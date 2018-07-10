@@ -14,6 +14,7 @@ OPTION(USE_GPU "Enable GPU-acclerated training (EXPERIMENTAL)" OFF)
 OPTION(USE_SWIG "Enable SWIG to generate Java API" OFF)
 OPTION(USE_HDFS "Enable HDFS support (EXPERIMENTAL)" OFF)
 OPTION(USE_R35 "Set to ON if your R version is not smaller than 3.5" OFF)
+OPTION(USE_FPGA "Enable FPGA acceleration on AWS F1 instance" OFF)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.8.2")
@@ -149,6 +150,35 @@ if(USE_MPI)
   include_directories(${MPI_CXX_INCLUDE_PATH})
 endif(USE_MPI)
 
+if(USE_FPGA)
+
+file(GLOB SOURCES
+    src/application/*.cpp
+    src/boosting/*.cpp
+    src/io/*.cpp
+    src/metric/*.cpp
+    src/objective/*.cpp
+    src/network/*.cpp
+    src/treelearner/*.cpp
+    src/fpgaboost/libs/xcl2/xcl2.cpp
+)
+
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-narrowing -Wunused-parameter -L/opt/Xilinx/SDx/2017.1.op/runtime/lib/x86_64 -L/opt/Xilinx/SDx/2017.1.op/lib/lnx64.o -l OpenCL")
+
+  include_directories(src/fpgaboost/libs/xcl2)
+  include_directories(/opt/Xilinx/SDx/2017.1.op/runtime/include/1_2)
+
+  ADD_DEFINITIONS(-DUSE_FPGA)
+
+  if(FPGA_DEBUG)
+    ADD_DEFINITIONS(-DFPGADEBUG)
+  endif(FPGA_DEBUG)    
+
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0")
+
+else(USE_FPGA)
+
+
 file(GLOB SOURCES
     src/application/*.cpp
     src/boosting/*.cpp
@@ -158,9 +188,11 @@ file(GLOB SOURCES
     src/network/*.cpp
     src/treelearner/*.cpp
 )
+endif(USE_FPGA)
 
 add_executable(lightgbm src/main.cpp ${SOURCES})
 add_library(_lightgbm SHARED src/c_api.cpp src/lightgbm_R.cpp  ${SOURCES})
+include_directories("src")
 
 if(USE_SWIG)
   set_property(SOURCE swig/lightgbmlib.i PROPERTY CPLUSPLUS ON)
@@ -187,6 +219,13 @@ if(USE_GPU)
   TARGET_LINK_LIBRARIES(lightgbm ${OpenCL_LIBRARY} ${Boost_LIBRARIES})
   TARGET_LINK_LIBRARIES(_lightgbm ${OpenCL_LIBRARY} ${Boost_LIBRARIES})
 endif(USE_GPU)
+
+if(USE_FPGA)
+  link_directories(/opt/Xilinx/SDx/2017.1.op/runtime/lib/x86_64)
+  link_directories(/opt/Xilinx/SDx/2017.1.op/lib/lnx64.o)
+
+  target_link_libraries(lightgbm OpenCL)
+endif(USE_FPGA)
 
 if(USE_HDFS)
   TARGET_LINK_LIBRARIES(lightgbm ${HDFS_CXX_LIBRARIES})

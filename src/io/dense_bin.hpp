@@ -3,6 +3,10 @@
 
 #include <LightGBM/bin.h>
 
+#ifdef USE_FPGA
+#include <fpgaboost/fpgasdacell.hpp>
+#endif
+
 #include <vector>
 #include <cstring>
 #include <cstdint>
@@ -45,6 +49,9 @@ public:
   friend DenseBinIterator<VAL_T>;
   DenseBin(data_size_t num_data)
     : num_data_(num_data), data_(num_data_, static_cast<VAL_T>(0)) {
+      // #ifdef USE_FPGA
+      // init_xilinx();
+      // #endif
   }
 
   ~DenseBin() {
@@ -65,7 +72,43 @@ public:
 
   void ConstructHistogram(const data_size_t* data_indices, data_size_t num_data,
                           const score_t* ordered_gradients, const score_t* ordered_hessians,
-                          HistogramBinEntry* out) const override {
+                          HistogramBinEntry* out, int hist_size) const override {
+#ifdef USE_FPGA
+    int mode = DATAINDICES + HESSIANS + GRADIENTS;
+    //int hist_size = max_bin_;
+    //int hist_size = Bin::num_bin();
+
+    float hhess[hist_size], hgrad[hist_size];
+    int hist[hist_size];
+
+    //prepare output
+    for (int i=0; i<hist_size; i++){
+      hhess[i] = out[i].sum_hessians;
+      hgrad[i] = out[i].sum_gradients;
+      hist[i]  = out[i].cnt;
+    }
+
+    int err = fpgacall<VAL_T>(
+        data_.size(),      //int    data_size,          //overall data size
+        data_,             //int*   data_pointer,       //pointer to array of bin numbers
+        ordered_hessians,  //float* hessian_pointer,    //pointer to array of hessian values
+        ordered_gradients, //float* gradient_pointer,   //pointer to array of gradient values
+        num_data,          //int    index_size,         //size of index array
+        data_indices,      //int*   index_pointer,      //pointer to array of indices
+        hist_size,         //int    histogram_size,     //size of histogram
+        hhess,             //float* histogram_hessian,  //pointer to sums of hessian values
+        hgrad,             //float* histogram_gradient, //pointer to sums of gradient values
+        hist,              //int*   histogram_couter,   //pointer to histogram counters
+        mode               //int    mode                //mode-selector sets to use gradient,hessian,indices 
+    );
+
+    //update output
+    for (int i=0; i<hist_size; i++){
+      out[i].sum_hessians = hhess[i];
+      out[i].sum_gradients = hgrad[i];
+      out[i].cnt = hist[i];
+    }
+#else
     const data_size_t rest = num_data & 0x3;
     data_size_t i = 0;
     for (; i < num_data - rest; i += 4) {
@@ -95,11 +138,48 @@ public:
       out[bin].sum_hessians += ordered_hessians[i];
       ++out[bin].cnt;
     }
+#endif
   }
 
   void ConstructHistogram(data_size_t num_data,
                           const score_t* ordered_gradients, const score_t* ordered_hessians,
-                          HistogramBinEntry* out) const override {
+                          HistogramBinEntry* out, int hist_size) const override {
+#ifdef USE_FPGA
+    int mode = HESSIANS + GRADIENTS;
+    //int hist_size = max_bin_;
+    //int hist_size = Bin::num_bin();
+
+    float hhess[hist_size], hgrad[hist_size];
+    int hist[hist_size];
+
+    //prepare output
+    for (int i=0; i<hist_size; i++){
+      hhess[i] = out[i].sum_hessians;
+      hgrad[i] = out[i].sum_gradients;
+      hist[i]  = out[i].cnt;
+    }
+
+    int err = fpgacall<VAL_T>(
+        num_data,          //int    data_size,          //overall data size
+        data_,             //int*   data_pointer,       //pointer to array of bin numbers
+        ordered_hessians,  //float* hessian_pointer,    //pointer to array of hessian values
+        ordered_gradients, //float* gradient_pointer,   //pointer to array of gradient values
+        0,                 //int    index_size,         //size of index array
+        NULL,              //int*   index_pointer,      //pointer to array of indices
+        hist_size,         //int    histogram_size,     //size of histogram
+        hhess,             //float* histogram_hessian,  //pointer to sums of hessian values
+        hgrad,             //float* histogram_gradient, //pointer to sums of gradient values
+        hist,              //int*   histogram_couter,   //pointer to histogram counters
+        mode               //int    mode                //mode-selector sets to use gradient,hessian,indices 
+    );
+
+    //update output
+    for (int i=0; i<hist_size; i++){
+      out[i].sum_hessians = hhess[i];
+      out[i].sum_gradients = hgrad[i];
+      out[i].cnt = hist[i];
+    }
+#else
     const data_size_t rest = num_data & 0x3;
     data_size_t i = 0;
     for (; i < num_data - rest; i += 4) {
@@ -129,11 +209,46 @@ public:
       out[bin].sum_hessians += ordered_hessians[i];
       ++out[bin].cnt;
     }
+#endif
   }
 
   void ConstructHistogram(const data_size_t* data_indices, data_size_t num_data,
                           const score_t* ordered_gradients,
-                          HistogramBinEntry* out) const override {
+                          HistogramBinEntry* out, int hist_size) const override {
+#ifdef USE_FPGA
+    int mode = DATAINDICES + GRADIENTS;
+    //int hist_size = max_bin_;
+    //int hist_size = Bin::num_bin();
+
+    float hhess[hist_size], hgrad[hist_size];
+    int hist[hist_size];
+
+    //prepare output
+    for (int i=0; i<hist_size; i++){
+      hgrad[i] = out[i].sum_gradients;
+      hist[i]  = out[i].cnt;
+    }
+
+    int err = fpgacall<VAL_T>(
+        data_.size(),      //int    data_size,          //overall data size
+        data_,             //int*   data_pointer,       //pointer to array of bin numbers
+        NULL,              //float* hessian_pointer,    //pointer to array of hessian values
+        ordered_gradients, //float* gradient_pointer,   //pointer to array of gradient values
+        num_data,          //int    index_size,         //size of index array
+        data_indices,      //int*   index_pointer,      //pointer to array of indices
+        hist_size,         //int    histogram_size,     //size of histogram
+        hhess,             //float* histogram_hessian,  //pointer to sums of hessian values
+        hgrad,             //float* histogram_gradient, //pointer to sums of gradient values
+        hist,              //int*   histogram_couter,   //pointer to histogram counters
+        mode               //int    mode                //mode-selector sets to use gradient,hessian,indices 
+    );
+
+    //update output
+    for (int i=0; i<hist_size; i++){
+      out[i].sum_gradients = hgrad[i];
+      out[i].cnt = hist[i];
+    }
+#else
     const data_size_t rest = num_data & 0x3;
     data_size_t i = 0;
     for (; i < num_data - rest; i += 4) {
@@ -157,11 +272,46 @@ public:
       out[bin].sum_gradients += ordered_gradients[i];
       ++out[bin].cnt;
     }
+#endif
   }
 
   void ConstructHistogram(data_size_t num_data,
                           const score_t* ordered_gradients,
-                          HistogramBinEntry* out) const override {
+                          HistogramBinEntry* out, int hist_size) const override {
+#ifdef USE_FPGA
+    int mode = GRADIENTS;
+    //int hist_size = max_bin_;
+    //int hist_size = Bin::num_bin();
+
+    float hhess[hist_size], hgrad[hist_size];
+    int hist[hist_size];
+
+    //prepare output
+    for (int i=0; i<hist_size; i++){
+      hgrad[i] = out[i].sum_gradients;
+      hist[i]  = out[i].cnt;
+    }
+
+    int err = fpgacall<VAL_T>(
+        num_data,          //int    data_size,          //overall data size
+        data_,             //int*   data_pointer,       //pointer to array of bin numbers
+        NULL,              //float* hessian_pointer,    //pointer to array of hessian values
+        ordered_gradients, //float* gradient_pointer,   //pointer to array of gradient values
+        0,                 //int    index_size,         //size of index array
+        NULL,              //int*   index_pointer,      //pointer to array of indices
+        hist_size,         //int    histogram_size,     //size of histogram
+        hhess,             //float* histogram_hessian,  //pointer to sums of hessian values
+        hgrad,             //float* histogram_gradient, //pointer to sums of gradient values
+        hist,              //int*   histogram_couter,   //pointer to histogram counters
+        mode               //int    mode                //mode-selector sets to use gradient,hessian,indices 
+    );
+
+    //update output
+    for (int i=0; i<hist_size; i++){
+      out[i].sum_gradients = hgrad[i];
+      out[i].cnt = hist[i];
+    }
+#else
     const data_size_t rest = num_data & 0x3;
     data_size_t i = 0;
     for (; i < num_data - rest; i += 4) {
@@ -185,6 +335,7 @@ public:
       out[bin].sum_gradients += ordered_gradients[i];
       ++out[bin].cnt;
     }
+#endif
   }
 
   virtual data_size_t Split(

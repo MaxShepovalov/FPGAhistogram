@@ -237,7 +237,7 @@ public:
   * \param out Output Result
   */
   virtual void ConstructHistogram(int leaf, const score_t* gradients,
-    const score_t* hessians, HistogramBinEntry* out) const = 0;
+    const score_t* hessians, HistogramBinEntry* out, int hist_size) const = 0;
 
   /*!
   * \brief Construct histogram by using this bin
@@ -247,7 +247,7 @@ public:
   * \param gradients Gradients, Note:non-oredered by leaf
   * \param out Output Result
   */
-  virtual void ConstructHistogram(int leaf, const score_t* gradients, HistogramBinEntry* out) const = 0;
+  virtual void ConstructHistogram(int leaf, const score_t* gradients, HistogramBinEntry* out, int hist_size) const = 0;
 
   /*!
   * \brief Split current bin, and perform re-order by leaf
@@ -344,11 +344,11 @@ public:
   virtual void ConstructHistogram(
     const data_size_t* data_indices, data_size_t num_data,
     const score_t* ordered_gradients, const score_t* ordered_hessians,
-    HistogramBinEntry* out) const = 0;
+    HistogramBinEntry* out, int hist_size) const = 0;
 
   virtual void ConstructHistogram(data_size_t num_data,
     const score_t* ordered_gradients, const score_t* ordered_hessians,
-    HistogramBinEntry* out) const = 0;
+    HistogramBinEntry* out, int hist_size) const = 0;
 
   /*!
   * \brief Construct histogram of this feature,
@@ -363,10 +363,10 @@ public:
   * \param out Output Result
   */
   virtual void ConstructHistogram(const data_size_t* data_indices, data_size_t num_data,
-                                  const score_t* ordered_gradients, HistogramBinEntry* out) const = 0;
+                                  const score_t* ordered_gradients, HistogramBinEntry* out, int hist_size) const = 0;
 
   virtual void ConstructHistogram(data_size_t num_data,
-                                  const score_t* ordered_gradients, HistogramBinEntry* out) const = 0;
+                                  const score_t* ordered_gradients, HistogramBinEntry* out, int hist_size) const = 0;
 
   /*!
   * \brief Split data according to threshold, if bin <= threshold, will put into left(lte_indices), else put into right(gt_indices)
