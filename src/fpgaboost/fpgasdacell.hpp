@@ -110,13 +110,15 @@ void printArray(const T* data, int size, const char* name){
 // cl::Buffer buffer_hist = cl::Buffer();
 // cl::Buffer buffer_sgrad = cl::Buffer();
 // cl::Buffer buffer_shess = cl::Buffer();
-std::vector<cl::Memory> binsBufVec;
-std::vector<cl::Memory> indsBufVec;
-std::vector<cl::Memory> gradBufVec;
-std::vector<cl::Memory> hessBufVec;
-std::vector<cl::Memory> histBufVec;
-std::vector<cl::Memory> sgradBufVec;
-std::vector<cl::Memory> shessBufVec;
+
+//std::vector<cl::Memory> binsBufVec;
+//std::vector<cl::Memory> indsBufVec;
+//std::vector<cl::Memory> gradBufVec;
+//std::vector<cl::Memory> hessBufVec;
+//std::vector<cl::Memory> histBufVec;
+//std::vector<cl::Memory> sgradBufVec;
+//std::vector<cl::Memory> shessBufVec;
+
 //previous arguments for fpgacall. Used to decide if CPU->FPGA transfer needed
 //int          last_data_size = 0;
 void* last_data_pointer = 0;
@@ -141,46 +143,46 @@ bool dbg = true;
 bool dbg = false;
 #endif
 
-cl::Program init_xilinx(cl::CommandQueue & q, cl::Context & context){
-    //mtx.lock(); //need to init FPGA only once
+// cl::Program init_xilinx(cl::CommandQueue & q, cl::Context & context){
+//     //mtx.lock(); //need to init FPGA only once
 
-    cl::Program program;
+//     cl::Program program;
 
-    if (!device_setup){
+//     if (!device_setup){
 
-    //XILINX FPGA SETUP
-    // The get_xil_devices will return vector of Xilinx Devices 
-    std::vector<cl::Device> devices = xcl::get_xil_devices();
-    cl::Device device = devices[0];
+//     //XILINX FPGA SETUP
+//     // The get_xil_devices will return vector of Xilinx Devices 
+//     std::vector<cl::Device> devices = xcl::get_xil_devices();
+//     cl::Device device = devices[0];
 
-    //Creating Context and Command Queue for selected Device 
-    //cl::Context context(device);
-    context = cl::Context(device);
-    //cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
-    q = cl::CommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE);
-    std::string device_name = device.getInfo<CL_DEVICE_NAME>();
+//     //Creating Context and Command Queue for selected Device 
+//     //cl::Context context(device);
+//     context = cl::Context(device);
+//     //cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+//     q = cl::CommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE);
+//     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
 
-    // the OpenCL binary file created using the 
-    // xocc compiler load into OpenCL Binary and return as Binaries
-    // OpenCL and it can contain many functions which can be executed on the
-    // device.
-    std::string binaryFile = xcl::find_binary_file(device_name,"histogram");
-    cl::Program::Binaries binary_file = xcl::import_binary_file(binaryFile);
-    devices.resize(1);
-    program = cl::Program(context, devices, binary_file);
+//     // the OpenCL binary file created using the 
+//     // xocc compiler load into OpenCL Binary and return as Binaries
+//     // OpenCL and it can contain many functions which can be executed on the
+//     // device.
+//     std::string binaryFile = xcl::find_binary_file(device_name,"histogram");
+//     cl::Program::Binaries binary_file = xcl::import_binary_file(binaryFile);
+//     devices.resize(1);
+//     program = cl::Program(context, devices, binary_file);
 
-#ifdef FPGADEBUG
-    std::cout << "Found Device=" << device_name.c_str() << std::endl;
-    size_t max_workgroup_size = device.getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>();
-    printf("Device's max_workgroup_size is %ld\n", max_workgroup_size);
-#endif
+// #ifdef FPGADEBUG
+//     std::cout << "Found Device=" << device_name.c_str() << std::endl;
+//     size_t max_workgroup_size = device.getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>();
+//     printf("Device's max_workgroup_size is %ld\n", max_workgroup_size);
+// #endif
 
-    device_setup = true;
-    }
+//     device_setup = true;
+//     }
 
-    //mtx.unlock();
-    return program;
-}
+//     //mtx.unlock();
+//     return program;
+// }
 
 template <typename T>
 int load_vector_to_buffer(cl::CommandQueue q, cl::Context context, int size, vector<T,aligned_allocator<T>> host_vector, std::vector<cl::Memory> & BufVec){
