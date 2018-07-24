@@ -121,22 +121,22 @@ void printArray(const T* data, int size, const char* name){
 
 //previous arguments for fpgacall. Used to decide if CPU->FPGA transfer needed
 //int          last_data_size = 0;
-void* last_data_pointer = 0;
+// void* last_data_pointer = 0;
 
-float* last_hessian_pointer = 0;
-float* last_gradient_pointer = 0;
-//int          last_index_size = 0;
-int*   last_index_pointer = 0;
-//int          last_histogram_size = 0;
-float*       last_histogram_hessian = 0;
-float*       last_histogram_gradient = 0;
-int*         last_histogram_couter = 0;
-//int          last_mode = 0;
+// float* last_hessian_pointer = 0;
+// float* last_gradient_pointer = 0;
+// //int          last_index_size = 0;
+// int*   last_index_pointer = 0;
+// //int          last_histogram_size = 0;
+// float*       last_histogram_hessian = 0;
+// float*       last_histogram_gradient = 0;
+// int*         last_histogram_couter = 0;
+// //int          last_mode = 0;
 
-//thread control
-std::mutex mtx;
+// //thread control
+// std::mutex mtx;
 
-bool device_setup = false;
+// bool device_setup = false;
 #ifdef FPGADEBUG
 bool dbg = true;
 #else
@@ -184,338 +184,338 @@ bool dbg = false;
 //     return program;
 // }
 
-template <typename T>
-int load_vector_to_buffer(cl::CommandQueue q, cl::Context context, int size, vector<T,aligned_allocator<T>> host_vector, std::vector<cl::Memory> & BufVec){
-#ifdef FPGADEBUG
-    //printf("Loading of %d values to device\n", size);
-    std::cout << "Loading of " << size << " values of type " << typeid(T).name() << " to device." << std::endl;
-#endif
-    size_t size_in_bytes = size * sizeof(T);
-    BufVec.clear();
-    cl::Buffer buf = cl::Buffer(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, size_in_bytes, host_vector.data());
-    BufVec.push_back(buf); // CL_MEM_ALLOC_HOST_PTR
-    cl_int err = q.enqueueMigrateMemObjects(BufVec,0);
-    q.finish(); //block write
-    //cl_int err = q.enqueueWriteBuffer(buf, CL_TRUE, 0, size_in_bytes, static_cast<void*>(host_vector.data()));
-    if (err != 0 || dbg){
-        printf("MIGRATEMEMOBJECTS (host -> device) code: %d, vector @ %ld with size %d\n", err, &BufVec, BufVec.size());
-        //printf("MIGRATEMEMOBJECTS (host -> device) code: %d, vector @ %ld\n", err, &BufVec);
-    }
-    return err;
-}
+// template <typename T>
+// int load_vector_to_buffer(cl::CommandQueue q, cl::Context context, int size, vector<T,aligned_allocator<T>> host_vector, std::vector<cl::Memory> & BufVec){
+// #ifdef FPGADEBUG
+//     //printf("Loading of %d values to device\n", size);
+//     std::cout << "Loading of " << size << " values of type " << typeid(T).name() << " to device." << std::endl;
+// #endif
+//     size_t size_in_bytes = size * sizeof(T);
+//     BufVec.clear();
+//     cl::Buffer buf = cl::Buffer(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, size_in_bytes, host_vector.data());
+//     BufVec.push_back(buf); // CL_MEM_ALLOC_HOST_PTR
+//     cl_int err = q.enqueueMigrateMemObjects(BufVec,0);
+//     q.finish(); //block write
+//     //cl_int err = q.enqueueWriteBuffer(buf, CL_TRUE, 0, size_in_bytes, static_cast<void*>(host_vector.data()));
+//     if (err != 0 || dbg){
+//         printf("MIGRATEMEMOBJECTS (host -> device) code: %d, vector @ %ld with size %d\n", err, &BufVec, BufVec.size());
+//         //printf("MIGRATEMEMOBJECTS (host -> device) code: %d, vector @ %ld\n", err, &BufVec);
+//     }
+//     return err;
+// }
 
-template <typename T>
-int load_vector_to_buffer(cl::CommandQueue q, cl::Context context, int size, std::vector<T, std::allocator<T>> host_vector, std::vector<cl::Memory> & BufVec){
-#ifdef FPGADEBUG
-    std::cout << "Converting vector of size " << size << " to be alligned for next transfer" << std::endl;
-#endif
-    vector<int,aligned_allocator<int>> alligned_host_vector;
-    for (int i = 0; i < size; i++){
-        alligned_host_vector.insert(alligned_host_vector.begin() + i, (int)host_vector[i]);
-    }
-    int err = load_vector_to_buffer<int>(q, context, size, alligned_host_vector, BufVec);
-    return err;
-}
+// template <typename T>
+// int load_vector_to_buffer(cl::CommandQueue q, cl::Context context, int size, std::vector<T, std::allocator<T>> host_vector, std::vector<cl::Memory> & BufVec){
+// #ifdef FPGADEBUG
+//     std::cout << "Converting vector of size " << size << " to be alligned for next transfer" << std::endl;
+// #endif
+//     vector<int,aligned_allocator<int>> alligned_host_vector;
+//     for (int i = 0; i < size; i++){
+//         alligned_host_vector.insert(alligned_host_vector.begin() + i, (int)host_vector[i]);
+//     }
+//     int err = load_vector_to_buffer<int>(q, context, size, alligned_host_vector, BufVec);
+//     return err;
+// }
 
-template <typename T>
-int load_array_to_buffer(cl::CommandQueue q, cl::Context context, int size, const T* host_array, std::vector<cl::Memory> & BufVec){
-    //vector<T,aligned_allocator<T>> host_data(host_array, host_array + size);
-    vector<T,aligned_allocator<T>> host_data;
-    for (int i=0; i < size; i++){
-        host_data.insert(host_data.begin() + i, host_array[i]);
-    }
-    int err = load_vector_to_buffer<T>(q, context, size, host_data, BufVec);
-    return err;
-}
+// template <typename T>
+// int load_array_to_buffer(cl::CommandQueue q, cl::Context context, int size, const T* host_array, std::vector<cl::Memory> & BufVec){
+//     //vector<T,aligned_allocator<T>> host_data(host_array, host_array + size);
+//     vector<T,aligned_allocator<T>> host_data;
+//     for (int i=0; i < size; i++){
+//         host_data.insert(host_data.begin() + i, host_array[i]);
+//     }
+//     int err = load_vector_to_buffer<T>(q, context, size, host_data, BufVec);
+//     return err;
+// }
 
-#ifndef USE_OLD_FPGACALL
+//#ifndef USE_OLD_FPGACALL
 
-template <typename VAL_T>
-int fpgacall_onethread(
-             int    data_size,
-             const std::vector<VAL_T, std::allocator<VAL_T>> data_pointer,
-             const float* hessian_pointer,
-             const float* gradient_pointer,
-             int    index_size,
-             const int*   index_pointer,
-             int    histogram_size,
-             float* histogram_hessian,
-             float* histogram_gradient,
-             int*   histogram_couter,
-             int    mode){
+// template <typename VAL_T>
+// int fpgacall_onethread(
+//              int    data_size,
+//              const std::vector<VAL_T, std::allocator<VAL_T>> data_pointer,
+//              const float* hessian_pointer,
+//              const float* gradient_pointer,
+//              int    index_size,
+//              const int*   index_pointer,
+//              int    histogram_size,
+//              float* histogram_hessian,
+//              float* histogram_gradient,
+//              int*   histogram_couter,
+//              int    mode){
 
-#ifdef FPGADEBUG
-    printf("DEBUG VERSION OF FPGASDACELL.HPP IS RUNNING\n");
-#endif
+// #ifdef FPGADEBUG
+//     printf("DEBUG VERSION OF FPGASDACELL.HPP IS RUNNING\n");
+// #endif
 
-    bool precheck = true;
-    int work_size = mode & DATAINDICES ? index_size : data_size;
+//     bool precheck = true;
+//     int work_size = mode & DATAINDICES ? index_size : data_size;
 
-    if ((mode & GRADIENTS) && !gradient_pointer){
-        printf("fgpasdacell: Mode require gradients, but gradient_pointer is NULL\n");
-        precheck = false;
-    }
-    if ((mode & HESSIANS) && !hessian_pointer){
-        printf("fgpasdacell: Mode require hessians, but hessian_pointer is NULL\n");
-        precheck = false;
-    }
-    if ((mode & DATAINDICES) && !gradient_pointer){
-        printf("fgpasdacell: Mode require indices, but index_pointer is NULL\n");
-        precheck = false;
-    }
-    //if (!device_setup){
-    //    printf("fpgasdacell: init device before fpgasdacell()\n");
-    //    precheck = false;
-    //}
-    if (!precheck){
-        printf("fgpasdacell: Wrong input parameters\n");
-        return -2;
-    }
-    if (work_size==0){
-        //printf("WORK_SIZE IS ZERO!!\n");
-        return 0;
-    }
+//     if ((mode & GRADIENTS) && !gradient_pointer){
+//         printf("fgpasdacell: Mode require gradients, but gradient_pointer is NULL\n");
+//         precheck = false;
+//     }
+//     if ((mode & HESSIANS) && !hessian_pointer){
+//         printf("fgpasdacell: Mode require hessians, but hessian_pointer is NULL\n");
+//         precheck = false;
+//     }
+//     if ((mode & DATAINDICES) && !gradient_pointer){
+//         printf("fgpasdacell: Mode require indices, but index_pointer is NULL\n");
+//         precheck = false;
+//     }
+//     //if (!device_setup){
+//     //    printf("fpgasdacell: init device before fpgasdacell()\n");
+//     //    precheck = false;
+//     //}
+//     if (!precheck){
+//         printf("fgpasdacell: Wrong input parameters\n");
+//         return -2;
+//     }
+//     if (work_size==0){
+//         //printf("WORK_SIZE IS ZERO!!\n");
+//         return 0;
+//     }
 
-    //output
-    vector<int,aligned_allocator<int>> histogram(histogram_couter, histogram_couter + histogram_size);
-    vector<float,aligned_allocator<float>> sum_gradients(histogram_gradient, histogram_gradient + histogram_size);
-    vector<float,aligned_allocator<float>> sum_hessians(histogram_hessian, histogram_hessian + histogram_size);
+//     //output
+//     vector<int,aligned_allocator<int>> histogram(histogram_couter, histogram_couter + histogram_size);
+//     vector<float,aligned_allocator<float>> sum_gradients(histogram_gradient, histogram_gradient + histogram_size);
+//     vector<float,aligned_allocator<float>> sum_hessians(histogram_hessian, histogram_hessian + histogram_size);
 
-    //patches for unused arrays
-    vector<int,aligned_allocator<int>> intpatch(1, 0);
-    vector<float,aligned_allocator<float>> floatpatch(1, 0.0);
+//     //patches for unused arrays
+//     vector<int,aligned_allocator<int>> intpatch(1, 0);
+//     vector<float,aligned_allocator<float>> floatpatch(1, 0.0);
 
-    device_setup = false;
-    cl::CommandQueue q;
-    cl::Context context;
-    cl::Program program = init_xilinx(q, context);
+//     device_setup = false;
+//     cl::CommandQueue q;
+//     cl::Context context;
+//     cl::Program program = init_xilinx(q, context);
 
-    bool datafailed = false;
-    //load input
-    if ((void*)&data_pointer != last_data_pointer){
-#ifdef FPGADEBUG
-        printf("New data pointer %ld (was %ld)\n", (void*)&data_pointer, last_data_pointer);
-#endif
-        load_vector_to_buffer<VAL_T>(q, context, data_size, data_pointer, binsBufVec);
-        last_data_pointer = (void*)&data_pointer;
-    }
-    if (binsBufVec.size() == 0){
-        printf("FPGA's buffer for data_ is empty");
-        return 0;
-    }
+//     bool datafailed = false;
+//     //load input
+//     if ((void*)&data_pointer != last_data_pointer){
+// #ifdef FPGADEBUG
+//         printf("New data pointer %ld (was %ld)\n", (void*)&data_pointer, last_data_pointer);
+// #endif
+//         load_vector_to_buffer<VAL_T>(q, context, data_size, data_pointer, binsBufVec);
+//         last_data_pointer = (void*)&data_pointer;
+//     }
+//     if (binsBufVec.size() == 0){
+//         printf("FPGA's buffer for data_ is empty");
+//         return 0;
+//     }
 
-    if (mode & DATAINDICES) {
-        if (index_pointer != last_index_pointer and index_pointer != NULL){
-#ifdef FPGADEBUG
-            printf("New index pointer %ld (was %ld)\n", index_pointer, last_index_pointer);
-#endif
-            int err = load_array_to_buffer<int>(q, context, index_size, index_pointer, indsBufVec);
-            last_index_pointer = const_cast<int*>(index_pointer);
-            if (err != 0){
-                datafailed = true;
-            }
-        }
-    }
-    if (indsBufVec.size() == 0){
-        int err = load_vector_to_buffer<int>(q, context, 1, intpatch, indsBufVec);
-        if (err != 0){
-            datafailed = true;
-        }
-    }
+//     if (mode & DATAINDICES) {
+//         if (index_pointer != last_index_pointer and index_pointer != NULL){
+// #ifdef FPGADEBUG
+//             printf("New index pointer %ld (was %ld)\n", index_pointer, last_index_pointer);
+// #endif
+//             int err = load_array_to_buffer<int>(q, context, index_size, index_pointer, indsBufVec);
+//             last_index_pointer = const_cast<int*>(index_pointer);
+//             if (err != 0){
+//                 datafailed = true;
+//             }
+//         }
+//     }
+//     if (indsBufVec.size() == 0){
+//         int err = load_vector_to_buffer<int>(q, context, 1, intpatch, indsBufVec);
+//         if (err != 0){
+//             datafailed = true;
+//         }
+//     }
 
-    if (mode & GRADIENTS) {
-        if (gradient_pointer != last_gradient_pointer and gradient_pointer != NULL){
-#ifdef FPGADEBUG
-            printf("New gradients pointer %ld (was %ld)\n", gradient_pointer, last_gradient_pointer);
-#endif
-            int err = load_array_to_buffer<float>(q, context, data_size, gradient_pointer, gradBufVec);
-            last_gradient_pointer = const_cast<float*>(gradient_pointer);
-            if (err != 0){
-                datafailed = true;
-            }
-        }
-    }
-    if (gradBufVec.size() == 0){
-        int err = load_vector_to_buffer<float>(q, context, 1, floatpatch, gradBufVec);
-        if (err != 0){
-            datafailed = true;
-        }
-    }
+//     if (mode & GRADIENTS) {
+//         if (gradient_pointer != last_gradient_pointer and gradient_pointer != NULL){
+// #ifdef FPGADEBUG
+//             printf("New gradients pointer %ld (was %ld)\n", gradient_pointer, last_gradient_pointer);
+// #endif
+//             int err = load_array_to_buffer<float>(q, context, data_size, gradient_pointer, gradBufVec);
+//             last_gradient_pointer = const_cast<float*>(gradient_pointer);
+//             if (err != 0){
+//                 datafailed = true;
+//             }
+//         }
+//     }
+//     if (gradBufVec.size() == 0){
+//         int err = load_vector_to_buffer<float>(q, context, 1, floatpatch, gradBufVec);
+//         if (err != 0){
+//             datafailed = true;
+//         }
+//     }
 
-    if (mode & HESSIANS) {
-        if (hessian_pointer != last_hessian_pointer and hessian_pointer != NULL) {
-#ifdef FPGADEBUG
-            printf("New hessians pointer %ld (was %ld)\n", hessian_pointer, last_hessian_pointer);
-#endif
-            int err = load_array_to_buffer<float>(q, context, data_size, hessian_pointer, hessBufVec);
-            last_hessian_pointer = const_cast<float*>(hessian_pointer);
-            if (err != 0){
-                datafailed = true;
-            }
-        }
-    }
-    if (hessBufVec.size() == 0){
-        int err = load_vector_to_buffer<float>(q, context, 1, floatpatch, hessBufVec);
-        if (err != 0){
-            datafailed = true;
-        }
-    }
+//     if (mode & HESSIANS) {
+//         if (hessian_pointer != last_hessian_pointer and hessian_pointer != NULL) {
+// #ifdef FPGADEBUG
+//             printf("New hessians pointer %ld (was %ld)\n", hessian_pointer, last_hessian_pointer);
+// #endif
+//             int err = load_array_to_buffer<float>(q, context, data_size, hessian_pointer, hessBufVec);
+//             last_hessian_pointer = const_cast<float*>(hessian_pointer);
+//             if (err != 0){
+//                 datafailed = true;
+//             }
+//         }
+//     }
+//     if (hessBufVec.size() == 0){
+//         int err = load_vector_to_buffer<float>(q, context, 1, floatpatch, hessBufVec);
+//         if (err != 0){
+//             datafailed = true;
+//         }
+//     }
 
-    //load output
-    if (last_histogram_couter != histogram_couter){
-#ifdef FPGADEBUG
-        printf("New histogram counter pointer %ld (was %ld)\n", histogram_couter, last_histogram_couter);
-#endif
-        int err = load_vector_to_buffer<int>(q, context, histogram_size, histogram, histBufVec);
-        last_histogram_couter = histogram_couter;
-        if (err != 0){
-            datafailed = true;
-        }
-    }
-    if (last_histogram_gradient != histogram_gradient){
-#ifdef FPGADEBUG
-        printf("New histogram gradients pointer %ld (was %ld)\n", histogram_gradient, last_histogram_gradient);
-#endif
-        int err = load_vector_to_buffer<float>(q, context, histogram_size, sum_gradients, sgradBufVec);
-        last_histogram_gradient = histogram_gradient;
-        if (err != 0){
-            datafailed = true;
-        }
-    }
-    if (last_histogram_hessian != histogram_hessian){
-#ifdef FPGADEBUG
-        printf("New histogram hessians pointer %ld (was %ld)\n", histogram_hessian, last_histogram_hessian);
-#endif
-        int err = load_vector_to_buffer<float>(q, context, histogram_size, sum_hessians, shessBufVec);
-        last_histogram_hessian = histogram_hessian;
-        if (err != 0){
-            datafailed = true;
-        }
-    }
+//     //load output
+//     if (last_histogram_couter != histogram_couter){
+// #ifdef FPGADEBUG
+//         printf("New histogram counter pointer %ld (was %ld)\n", histogram_couter, last_histogram_couter);
+// #endif
+//         int err = load_vector_to_buffer<int>(q, context, histogram_size, histogram, histBufVec);
+//         last_histogram_couter = histogram_couter;
+//         if (err != 0){
+//             datafailed = true;
+//         }
+//     }
+//     if (last_histogram_gradient != histogram_gradient){
+// #ifdef FPGADEBUG
+//         printf("New histogram gradients pointer %ld (was %ld)\n", histogram_gradient, last_histogram_gradient);
+// #endif
+//         int err = load_vector_to_buffer<float>(q, context, histogram_size, sum_gradients, sgradBufVec);
+//         last_histogram_gradient = histogram_gradient;
+//         if (err != 0){
+//             datafailed = true;
+//         }
+//     }
+//     if (last_histogram_hessian != histogram_hessian){
+// #ifdef FPGADEBUG
+//         printf("New histogram hessians pointer %ld (was %ld)\n", histogram_hessian, last_histogram_hessian);
+// #endif
+//         int err = load_vector_to_buffer<float>(q, context, histogram_size, sum_hessians, shessBufVec);
+//         last_histogram_hessian = histogram_hessian;
+//         if (err != 0){
+//             datafailed = true;
+//         }
+//     }
 
-    if (datafailed){
-        printf("Data transfer failed\n");
-        exit(-1);
-    }
+//     if (datafailed){
+//         printf("Data transfer failed\n");
+//         exit(-1);
+//     }
 
-#ifdef FPGADEBUG
-        printf("=====\nINPUTS:\n");
-        //printArray<VAL_T>(bins, data_size, "data");
-        printArray<VAL_T>(data_pointer, data_size, "data");
-        printArray<int>(index_pointer, index_size, "indices");
-        printArray<float>(gradient_pointer, data_size, "gradients");
-        printArray<float>(hessian_pointer, data_size, "hessians");
-        printf("=====/inputs\n");
-#endif
+// #ifdef FPGADEBUG
+//         printf("=====\nINPUTS:\n");
+//         //printArray<VAL_T>(bins, data_size, "data");
+//         printArray<VAL_T>(data_pointer, data_size, "data");
+//         printArray<int>(index_pointer, index_size, "indices");
+//         printArray<float>(gradient_pointer, data_size, "gradients");
+//         printArray<float>(hessian_pointer, data_size, "hessians");
+//         printf("=====/inputs\n");
+// #endif
 
-    // extract a kernel
-    cl::Kernel krnl_hist_add(program, "hist_lightgbm");
+//     // extract a kernel
+//     cl::Kernel krnl_hist_add(program, "hist_lightgbm");
 
-    //set the kernel Arguments
-    int narg=0;
-    int items_per_call = 1;
-    int work_size_ocl = work_size / items_per_call;
-    for (int i=256; i >= 1; i = i / 2){
-        if (work_size % i == 0){
-            items_per_call = i;
-            work_size_ocl = work_size / i;
-            break;
-        }
-    }
-    krnl_hist_add.setArg(narg++, items_per_call);//amount of data per one instance of a kernel
-    krnl_hist_add.setArg(narg++, binsBufVec[0]);//input bin indices
-    krnl_hist_add.setArg(narg++, indsBufVec[0]);//input data indices
-    krnl_hist_add.setArg(narg++, gradBufVec[0]);//input gradients
-    krnl_hist_add.setArg(narg++, hessBufVec[0]);//input hessians
-    krnl_hist_add.setArg(narg++, sgradBufVec[0]);//output sum gradients
-    krnl_hist_add.setArg(narg++, shessBufVec[0]);//output sum hessians
-    krnl_hist_add.setArg(narg++, histBufVec[0]);//output histogram (should not be NULL)
-    krnl_hist_add.setArg(narg++, mode);//sets what to use
-#ifdef FPGADEBUG
-    krnl_hist_add.setArg(narg++, 1);//do debug print
-    printf("Kernel arguments should be set. Glob Work_size %d, work load per kernel %d, Total items %d\n", work_size_ocl, items_per_call, work_size);
-#else
-    krnl_hist_add.setArg(narg++, 0);//skip debug print
-#endif
+//     //set the kernel Arguments
+//     int narg=0;
+//     int items_per_call = 1;
+//     int work_size_ocl = work_size / items_per_call;
+//     for (int i=256; i >= 1; i = i / 2){
+//         if (work_size % i == 0){
+//             items_per_call = i;
+//             work_size_ocl = work_size / i;
+//             break;
+//         }
+//     }
+//     krnl_hist_add.setArg(narg++, items_per_call);//amount of data per one instance of a kernel
+//     krnl_hist_add.setArg(narg++, binsBufVec[0]);//input bin indices
+//     krnl_hist_add.setArg(narg++, indsBufVec[0]);//input data indices
+//     krnl_hist_add.setArg(narg++, gradBufVec[0]);//input gradients
+//     krnl_hist_add.setArg(narg++, hessBufVec[0]);//input hessians
+//     krnl_hist_add.setArg(narg++, sgradBufVec[0]);//output sum gradients
+//     krnl_hist_add.setArg(narg++, shessBufVec[0]);//output sum hessians
+//     krnl_hist_add.setArg(narg++, histBufVec[0]);//output histogram (should not be NULL)
+//     krnl_hist_add.setArg(narg++, mode);//sets what to use
+// #ifdef FPGADEBUG
+//     krnl_hist_add.setArg(narg++, 1);//do debug print
+//     printf("Kernel arguments should be set. Glob Work_size %d, work load per kernel %d, Total items %d\n", work_size_ocl, items_per_call, work_size);
+// #else
+//     krnl_hist_add.setArg(narg++, 0);//skip debug print
+// #endif
 
-    //Launch the Kernel
-    q.enqueueNDRangeKernel(
-        krnl_hist_add, //kernel
-        cl::NullRange,    //work_dim (offset)
-        cl::NDRange(work_size_ocl),   //work_size (global)
-        cl::NullRange     //work_group_size (local)
-        );
+//     //Launch the Kernel
+//     q.enqueueNDRangeKernel(
+//         krnl_hist_add, //kernel
+//         cl::NullRange,    //work_dim (offset)
+//         cl::NDRange(work_size_ocl),   //work_size (global)
+//         cl::NullRange     //work_group_size (local)
+//         );
 
-    // The result of the previous kernel execution will need to be retrieved in
-    // order to view the results. This call will write the data from the
-    // buffer_result cl_mem object to the source_results vector
-    cl_int err = q.enqueueMigrateMemObjects(histBufVec, CL_MIGRATE_MEM_OBJECT_HOST);
-    if (err != 0 || dbg){
-        printf("MIGRATEMEMOBJECTS histBufVec (host <- device) code: %d\n", err);
-    }
+//     // The result of the previous kernel execution will need to be retrieved in
+//     // order to view the results. This call will write the data from the
+//     // buffer_result cl_mem object to the source_results vector
+//     cl_int err = q.enqueueMigrateMemObjects(histBufVec, CL_MIGRATE_MEM_OBJECT_HOST);
+//     if (err != 0 || dbg){
+//         printf("MIGRATEMEMOBJECTS histBufVec (host <- device) code: %d\n", err);
+//     }
     
-    if (mode & HESSIANS){
-        cl_int err = q.enqueueMigrateMemObjects(shessBufVec, CL_MIGRATE_MEM_OBJECT_HOST);
-        if (err != 0 || dbg){
-            printf("MIGRATEMEMOBJECTS shessBufVec (host <- device) code: %d\n", err);
-        }
-    }
-    if (mode & GRADIENTS){
-        cl_int err = q.enqueueMigrateMemObjects(sgradBufVec, CL_MIGRATE_MEM_OBJECT_HOST);
-        if (err != 0 || dbg){
-            printf("MIGRATEMEMOBJECTS sgradBufVec (host <- device) code: %d\n", err);
-        }
-    }
+//     if (mode & HESSIANS){
+//         cl_int err = q.enqueueMigrateMemObjects(shessBufVec, CL_MIGRATE_MEM_OBJECT_HOST);
+//         if (err != 0 || dbg){
+//             printf("MIGRATEMEMOBJECTS shessBufVec (host <- device) code: %d\n", err);
+//         }
+//     }
+//     if (mode & GRADIENTS){
+//         cl_int err = q.enqueueMigrateMemObjects(sgradBufVec, CL_MIGRATE_MEM_OBJECT_HOST);
+//         if (err != 0 || dbg){
+//             printf("MIGRATEMEMOBJECTS sgradBufVec (host <- device) code: %d\n", err);
+//         }
+//     }
 
-    q.finish();
+//     q.finish();
 
-#ifdef FPGADEBUG
-        printf("====RESULTS\n");
-        printf("mode = %d\n", mode);
-        printArray<int>(histogram, histogram_size, "hist");
-        printArray<float>(sum_gradients, histogram_size, "sum_grad");
-        printArray<float>(sum_hessians, histogram_size, "sum_hess");
-#endif
+// #ifdef FPGADEBUG
+//         printf("====RESULTS\n");
+//         printf("mode = %d\n", mode);
+//         printArray<int>(histogram, histogram_size, "hist");
+//         printArray<float>(sum_gradients, histogram_size, "sum_grad");
+//         printArray<float>(sum_hessians, histogram_size, "sum_hess");
+// #endif
 
-    //move out data
-    for (int i=0; i < histogram_size; i++){
-        histogram_couter[i] = histogram[i];
-        if (mode & GRADIENTS){
-            histogram_gradient[i] = sum_gradients[i];
-        }
-        if (mode & HESSIANS){
-            histogram_hessian[i] = sum_hessians[i];
-        }
-    }
+//     //move out data
+//     for (int i=0; i < histogram_size; i++){
+//         histogram_couter[i] = histogram[i];
+//         if (mode & GRADIENTS){
+//             histogram_gradient[i] = sum_gradients[i];
+//         }
+//         if (mode & HESSIANS){
+//             histogram_hessian[i] = sum_hessians[i];
+//         }
+//     }
 
-    return err;
-}
+//     return err;
+// }
 
-template <typename VAL_T>
-int fpgacall(
-             int    data_size,
-             const std::vector<VAL_T, std::allocator<VAL_T>> data_pointer,
-             const float* hessian_pointer,
-             const float* gradient_pointer,
-             int    index_size,
-             const int*   index_pointer,
-             int    histogram_size,
-             float* histogram_hessian,
-             float* histogram_gradient,
-             int*   histogram_couter,
-             int    mode){
+// template <typename VAL_T>
+// int fpgacall(
+//              int    data_size,
+//              const std::vector<VAL_T, std::allocator<VAL_T>> data_pointer,
+//              const float* hessian_pointer,
+//              const float* gradient_pointer,
+//              int    index_size,
+//              const int*   index_pointer,
+//              int    histogram_size,
+//              float* histogram_hessian,
+//              float* histogram_gradient,
+//              int*   histogram_couter,
+//              int    mode){
     
-    mtx.lock();
+//     mtx.lock();
 
-    int err = fpgacall_onethread(
-        data_size, data_pointer, hessian_pointer, gradient_pointer,
-        index_size, index_pointer, histogram_size, histogram_hessian,
-        histogram_gradient, histogram_couter, mode);
+//     int err = fpgacall_onethread(
+//         data_size, data_pointer, hessian_pointer, gradient_pointer,
+//         index_size, index_pointer, histogram_size, histogram_hessian,
+//         histogram_gradient, histogram_couter, mode);
     
-    mtx.unlock();
+//     mtx.unlock();
 
-    return err;
-}
+//     return err;
+// }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -527,7 +527,7 @@ int fpgacall(
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#else
+//#else
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
