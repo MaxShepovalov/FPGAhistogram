@@ -612,7 +612,7 @@ int fpgacall(
 /////////////////////////////////////////////////////////////////////////////////////////////
 
     //compute the size of array in bytes
-    size_t data_size_in_bytes = data_size * sizeof(int);
+    size_t data_size_in_bytes = data_size * sizeof(VAL_T);
     size_t index_size_in_bytes = index_size * sizeof(int);
     size_t hist_size_in_bytes = histogram_size * sizeof(int);
 
