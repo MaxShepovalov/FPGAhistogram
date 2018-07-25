@@ -680,8 +680,8 @@ int fpgacall(
         printArray<float>(hessians, data_size, "hessians");
         VAL_T k;
         printf("Size of VAL_T: %d and type of %s\n=====\n", sizeof(VAL_T), typeid(k).name());
-        unsigned char q;
-        printf("Size of unsigned char: %d type %s\n", sizeof(unsigned char), typeid(q).name());
+        unsigned char uc;
+        printf("Size of unsigned char: %d type %s\n", sizeof(unsigned char), typeid(uc).name());
         unsigned short s;
         printf("Size of unsigned short: %d and type of %s\n", sizeof(unsigned short), typeid(s).name());
         unsigned int r;
