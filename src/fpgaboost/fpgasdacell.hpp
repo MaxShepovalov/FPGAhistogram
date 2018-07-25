@@ -8,6 +8,8 @@
 #include <LightGBM/meta.h>
 #include <mutex>
 
+#include <typeinfo>
+
 //fpga connection libraries
 #include "xcl2.hpp"
 #include <vector>
@@ -33,32 +35,6 @@ void check(cl_int err, int linenum) {
 
 #ifdef FPGADEBUG
 #pragma message "\n\n      FPGADEBUG is active \n\n"
-
-namespace internal
-{
-  static const unsigned int FRONT_SIZE = sizeof("internal::GetTypeNameHelper<") - 1u;
-  static const unsigned int BACK_SIZE = sizeof(">::GetTypeName") - 1u;
- 
-  template <typename T>
-  struct GetTypeNameHelper
-  {
-    static const char* GetTypeName(void)
-    {
-      static const size_t size = sizeof(__FUNCTION__) - FRONT_SIZE - BACK_SIZE;
-      static char typeName[size] = {};
-      memcpy(typeName, __FUNCTION__ + FRONT_SIZE, size - 1u);
- 
-      return typeName;
-    }
-  };
-}
- 
- 
-template <typename T>
-const char* GetTypeName(void)
-{
-  return internal::GetTypeNameHelper<T>::GetTypeName();
-}
 
 template <typename T>
 void printArray(std::vector<T, std::allocator<T>> data, int size, const char* name){
@@ -702,7 +678,8 @@ int fpgacall(
         printArray<int>(indices, index_size, "indices");
         printArray<float>(gradients, data_size, "gradients");
         printArray<float>(hessians, data_size, "hessians");
-        printf("Size of VAL_T: %d and type of %s\n", sizeof(VAL_T), GetTypeName<VAL_T>());
+        VAL_T k;
+        printf("Size of VAL_T: %d and type of %s\n", sizeof(VAL_T), typeid(k).name());
         printf("=====/inputs\n");
 #endif
 
