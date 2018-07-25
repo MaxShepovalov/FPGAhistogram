@@ -24,14 +24,40 @@ using std::vector;
 
 //#define USE_OLD_FPGACALL //use "always-load-parameters" fpgacall
 
-#ifdef FPGADEBUG
-#pragma message "\n\n      FPGADEBUG is active \n\n"
-
 void check(cl_int err, int linenum) {
   if (err) {
     printf("ERROR at line %d: Operation Failed: %d\n", linenum, err);
     exit(EXIT_FAILURE);
   }
+}
+
+#ifdef FPGADEBUG
+#pragma message "\n\n      FPGADEBUG is active \n\n"
+
+namespace internal
+{
+  static const unsigned int FRONT_SIZE = sizeof("internal::GetTypeNameHelper<") - 1u;
+  static const unsigned int BACK_SIZE = sizeof(">::GetTypeName") - 1u;
+ 
+  template <typename T>
+  struct GetTypeNameHelper
+  {
+    static const char* GetTypeName(void)
+    {
+      static const size_t size = sizeof(__FUNCTION__) - FRONT_SIZE - BACK_SIZE;
+      static char typeName[size] = {};
+      memcpy(typeName, __FUNCTION__ + FRONT_SIZE, size - 1u);
+ 
+      return typeName;
+    }
+  };
+}
+ 
+ 
+template <typename T>
+const char* GetTypeName(void)
+{
+  return internal::GetTypeNameHelper<T>::GetTypeName();
 }
 
 template <typename T>
@@ -676,7 +702,7 @@ int fpgacall(
         printArray<int>(indices, index_size, "indices");
         printArray<float>(gradients, data_size, "gradients");
         printArray<float>(hessians, data_size, "hessians");
-        printf("Size of VAL_T: %d\n", sizeof(VAL_T));
+        printf("Size of VAL_T: %d and type of %s\n", sizeof(VAL_T), GetTypeName<VAL_T>());
         printf("=====/inputs\n");
 #endif
 
