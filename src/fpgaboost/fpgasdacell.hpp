@@ -133,8 +133,8 @@ void printArray(const T* data, int size, const char* name){
 // int*         last_histogram_couter = 0;
 // //int          last_mode = 0;
 
-// //thread control
-// std::mutex mtx;
+//thread control
+std::mutex mtx;
 
 // bool device_setup = false;
 #ifdef FPGADEBUG
@@ -143,7 +143,7 @@ bool dbg = true;
 bool dbg = false;
 #endif
 
-// cl::Program init_xilinx(cl::CommandQueue & q, cl::Context & context){
+ cl::Program init_xilinx(cl::CommandQueue & q, cl::Context & context){}
 //     //mtx.lock(); //need to init FPGA only once
 
 //     cl::Program program;
@@ -571,10 +571,10 @@ int fpgacall(
         printf("fgpasdacell: Mode require indices, but index_pointer is NULL\n");
         precheck = false;
     }
-    if (!device_setup){
-        printf("fpgasdacell: init device before fpgasdacell()\n");
-        precheck = false;
-    }
+    // if (!device_setup){
+    //     printf("fpgasdacell: init device before fpgasdacell()\n");
+    //     precheck = false;
+    // }
     if (!precheck){
         printf("fgpasdacell: Wrong input parameters\n");
         return -2;
@@ -583,6 +583,33 @@ int fpgacall(
         //printf("WORK_SIZE IS ZERO!!\n");
         return 0;
     }
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+    cl::Program program;
+
+    //if (!device_setup){
+
+    //XILINX FPGA SETUP
+    // The get_xil_devices will return vector of Xilinx Devices 
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
+
+    //Creating Context and Command Queue for selected Device 
+    //cl::Context context(device);
+    context = cl::Context(device);
+    //cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+    q = cl::CommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE);
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>();
+
+    // the OpenCL binary file created using the 
+    // xocc compiler load into OpenCL Binary and return as Binaries
+    // OpenCL and it can contain many functions which can be executed on the
+    // device.
+    std::string binaryFile = xcl::find_binary_file(device_name,"histogram");
+    cl::Program::Binaries binary_file = xcl::import_binary_file(binaryFile);
+    devices.resize(1);
+    program = cl::Program(context, devices, binary_file);
+/////////////////////////////////////////////////////////////////////////////////////////////
 
     //compute the size of array in bytes
     size_t data_size_in_bytes = data_size * sizeof(int);
