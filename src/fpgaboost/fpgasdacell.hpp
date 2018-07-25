@@ -595,10 +595,10 @@ int fpgacall(
     cl::Device device = devices[0];
 
     //Creating Context and Command Queue for selected Device 
-    //cl::Context context(device);
-    context = cl::Context(device);
-    //cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
-    q = cl::CommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE);
+    cl::Context context(device);
+    //context = cl::Context(device);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+    //q = cl::CommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE);
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
 
     // the OpenCL binary file created using the 
@@ -798,6 +798,6 @@ int fpgacall(
 }
 
 
-#endif //USE_OLD_FPGACALL
+//#endif //USE_OLD_FPGACALL
 
 #endif //FPGASDACELL
