@@ -679,7 +679,13 @@ int fpgacall(
         printArray<float>(gradients, data_size, "gradients");
         printArray<float>(hessians, data_size, "hessians");
         VAL_T k;
-        printf("Size of VAL_T: %d and type of %s\n", sizeof(VAL_T), typeid(k).name());
+        printf("Size of VAL_T: %d and type of %s\n=====\n", sizeof(VAL_T), typeid(k).name());
+        unsigned char q;
+        printf("Size of unsigned char: %d type %s\n", sizeof(unsigned char), typeid(q).name());
+        unsigned short s;
+        printf("Size of unsigned short: %d and type of %s\n", sizeof(unsigned short), typeid(s).name());
+        unsigned int r;
+        printf("Size of unsigned int: %d and type of %s\n", sizeof(unsigned int), typeid(r).name());
         printf("=====/inputs\n");
 #endif
 
