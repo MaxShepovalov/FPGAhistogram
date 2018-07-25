@@ -27,6 +27,13 @@ using std::vector;
 #ifdef FPGADEBUG
 #pragma message "\n\n      FPGADEBUG is active \n\n"
 
+void check(cl_int err, int linenum) {
+  if (err) {
+    printf("ERROR at line %d: Operation Failed: %d\n", linenum, err);
+    exit(EXIT_FAILURE);
+  }
+}
+
 template <typename T>
 void printArray(std::vector<T, std::allocator<T>> data, int size, const char* name){
     if (size >= 1) {
@@ -612,9 +619,6 @@ int fpgacall(
 /////////////////////////////////////////////////////////////////////////////////////////////
 
     //compute the size of array in bytes
-    size_t data_size_in_bytes = data_size * sizeof(VAL_T);
-    size_t index_size_in_bytes = index_size * sizeof(int);
-    size_t hist_size_in_bytes = histogram_size * sizeof(int);
 
     // Creates a vector for data
     //input
@@ -672,6 +676,7 @@ int fpgacall(
         printArray<int>(indices, index_size, "indices");
         printArray<float>(gradients, data_size, "gradients");
         printArray<float>(hessians, data_size, "hessians");
+        printf("Size of VAL_T: %d\n", sizeof(VAL_T));
         printf("=====/inputs\n");
 #endif
 
@@ -682,6 +687,13 @@ int fpgacall(
     cl::Buffer buffer_grad;
     cl::Buffer buffer_hess;
     // cl::Buffer buffer_bins(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, data_size_in_bytes, bins.data());
+
+    size_t data_size_in_bytes = data_pointer.size() * sizeof(VAL_T);
+    size_t grad_size_in_bytes = gradients.size() * sizeof(float);
+    size_t hess_size_in_bytes = hessians.size() * sizeof(float);
+    size_t index_size_in_bytes = index_size * sizeof(int);
+    size_t hist_size_in_bytes = histogram_size * sizeof(int);
+    size_t sums_size_in_bytes = histogram_size * sizeof(float);
     
     buffer_bins = cl::Buffer(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, data_size_in_bytes, const_cast<VAL_T*>(data_pointer.data()));
     if (mode & DATAINDICES) {
@@ -690,19 +702,19 @@ int fpgacall(
         buffer_inds = cl::Buffer(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 1, intpatch.data());
     }
     if (mode & GRADIENTS) {
-        buffer_grad = cl::Buffer(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, data_size_in_bytes, gradients.data());
+        buffer_grad = cl::Buffer(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, grad_size_in_bytes, gradients.data());
     } else {
         buffer_grad = cl::Buffer(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 1, floatpatch.data());
     }
     if (mode & HESSIANS) {
-        buffer_hess = cl::Buffer(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, data_size_in_bytes, hessians.data());
+        buffer_hess = cl::Buffer(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, hess_size_in_bytes, hessians.data());
     } else {
         buffer_hess = cl::Buffer(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 1, floatpatch.data());
     }
     //output
     cl::Buffer buffer_hist(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, hist_size_in_bytes, histogram.data());
-    cl::Buffer buffer_sgrad(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, hist_size_in_bytes, sum_gradients.data());
-    cl::Buffer buffer_shess(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, hist_size_in_bytes, sum_hessians.data());
+    cl::Buffer buffer_sgrad(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, sums_size_in_bytes, sum_gradients.data());
+    cl::Buffer buffer_shess(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, sums_size_in_bytes, sum_hessians.data());
     
     //Separate Read/write Buffer vector is needed to migrate data between host/device
     std::vector<cl::Memory> inBufVec, outBufVec;
@@ -717,12 +729,14 @@ int fpgacall(
 
     // load data vector from the host to the FPGA
     cl_int err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
+    check(err, 727);
 
 #ifdef FPGADEBUG
         printf("MIGRATEMEMOBJECTS inBufVec (host -> device) code: %d\n", err);
 #endif
 
     err = q.enqueueMigrateMemObjects(outBufVec,0);
+    check(err, 734);
 
 #ifdef FPGADEBUG
         printf("MIGRATEMEMOBJECTS outBufVec (host -> device) code: %d\n", err);
@@ -765,6 +779,7 @@ int fpgacall(
     // order to view the results. This call will write the data from the
     // buffer_result cl_mem object to the source_results vector
     err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    check(err, 777);
 
 #ifdef FPGADEBUG
         printf("MIGRATEMEMOBJECTS outBufVec (host <- device) code: %d\n", err);
