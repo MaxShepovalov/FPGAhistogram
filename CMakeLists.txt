@@ -172,6 +172,7 @@ file(GLOB SOURCES
 
   if(FPGA_DEBUG)
     ADD_DEFINITIONS(-DFPGADEBUG)
+    message(STATUS "Using FPGA DEBUG version of LightGBM")
   endif(FPGA_DEBUG)    
 
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0")
