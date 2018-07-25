@@ -624,7 +624,8 @@ int fpgacall(
 
     // Creates a vector for data
     //input
-    //data_pointer is a vector already. //vector<int,aligned_allocator<int>> bins(data_size, 0);
+    //data_pointer is a vector already. //
+    vector<int,aligned_allocator<int>> bins(data_size, 0);
     vector<int,aligned_allocator<int>> indices(index_size, 0);
     vector<float,aligned_allocator<float>> gradients(data_size, 0.0);
     vector<float,aligned_allocator<float>> hessians(data_size, 0.0);
@@ -642,8 +643,8 @@ int fpgacall(
     //fill data
     //srand ( time(NULL) );
     for (int i=0; i < data_size; i++){
-        //int value = data_pointer[i];
-        //bins.insert(bins.begin() + i, value);
+        int value = (int)data_pointer[i];
+        bins.insert(bins.begin() + i, value);
 
         if (mode & HESSIANS) {
             hessians.insert(hessians.begin() + i, hessian_pointer[i]);
@@ -697,14 +698,15 @@ int fpgacall(
     cl::Buffer buffer_hess;
     // cl::Buffer buffer_bins(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, data_size_in_bytes, bins.data());
 
-    size_t data_size_in_bytes = data_pointer.size() * sizeof(VAL_T);
+    size_t data_size_in_bytes = data_pointer.size() * sizeof(int);
     size_t grad_size_in_bytes = gradients.size() * sizeof(float);
     size_t hess_size_in_bytes = hessians.size() * sizeof(float);
     size_t index_size_in_bytes = index_size * sizeof(int);
     size_t hist_size_in_bytes = histogram_size * sizeof(int);
     size_t sums_size_in_bytes = histogram_size * sizeof(float);
     
-    buffer_bins = cl::Buffer(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, data_size_in_bytes, const_cast<VAL_T*>(data_pointer.data()));
+    //buffer_bins = cl::Buffer(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, data_size_in_bytes, const_cast<VAL_T*>(data_pointer.data()));
+    buffer_bins = cl::Buffer(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, data_size_in_bytes, bins.data());
     if (mode & DATAINDICES) {
         buffer_inds = cl::Buffer(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, index_size_in_bytes, indices.data());
     } else {
