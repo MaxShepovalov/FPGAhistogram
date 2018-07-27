@@ -12,6 +12,7 @@
 
 //fpga connection libraries
 #include "xcl2.hpp"
+#include <CL/cl.h>
 #include <vector>
 #include <cstdlib>
 
@@ -816,6 +817,13 @@ int fpgacall(
             histogram_hessian[i] = sum_hessians[i];
         }
     }
+
+    //release kernel and program
+    //check(clReleaseMemObject(buffer_result));
+    check(clReleaseKernel(krnl_hist_add));
+    check(clReleaseProgram(program));
+    check(clReleaseCommandQueue(q));
+    check(clReleaseContext(context));
 
 #ifdef ONETHREAD
     mtx.unlock();
