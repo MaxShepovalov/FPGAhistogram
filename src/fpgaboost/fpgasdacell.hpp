@@ -748,7 +748,7 @@ int fpgacall(
 
     // load data vector from the host to the FPGA
     cl::Event inbuf_event;
-    cl_int err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/, &inbuf_event);
+    cl_int err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/, NULL, &inbuf_event);
 #ifdef FPGADEBUG
     uint64_t duration = get_duration_ns(kernel_event);
     printf("Argument load took %" PRIu64 "\n", duration);
@@ -794,7 +794,8 @@ int fpgacall(
         krnl_hist_add, //kernel
         {1},    //work_dim (offset)
         {work_size},   //work_size (global)
-        {1}     //work_size (local)
+        {1},     //work_size (local)
+        NULL,
         &kernel_event);
 
 #ifdef FPGADEBUG
