@@ -3,6 +3,7 @@
 #ifndef FPGASDACELL
 #define FPGASDACELL
 #define __STDC_FORMAT_MACROS
+#include <inttypes.h>
 
 #include <vector>
 #include <iostream>
