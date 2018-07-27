@@ -794,11 +794,12 @@ int fpgacall(
     krnl_hist_add.setArg(narg++, buffer_shess);//output sum hessians
     krnl_hist_add.setArg(narg++, buffer_hist);//output histogram (should not be NULL)
     krnl_hist_add.setArg(narg++, mode);//sets what to use
-#ifdef FPGADEBUG
-    krnl_hist_add.setArg(narg++, 1);//do debug print
-#else
+//#ifdef FPGADEBUG
+//    krnl_hist_add.setArg(narg++, 1);//do debug print
+//    printf("kernel print should work\n");
+//#else
     krnl_hist_add.setArg(narg++, 0);//skip debug print
-#endif
+//#endif
 
 #ifdef FPGADEBUG
         printf("Kernel arguments should be set\n");
