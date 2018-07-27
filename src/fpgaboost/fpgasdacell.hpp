@@ -34,6 +34,13 @@ void check(cl_int err, int linenum) {
   }
 }
 
+uint64_t get_duration_ns (const cl::Event &event) {
+    uint64_t nstimestart, nstimeend;
+    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
+    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
+    return(nstimeend-nstimestart);
+}
+
 #ifdef FPGADEBUG
 #pragma message "\n\n      FPGADEBUG is active \n\n"
 
@@ -740,15 +747,17 @@ int fpgacall(
     outBufVec.push_back(buffer_shess);
 
     // load data vector from the host to the FPGA
-    cl_int err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
-    check(err, 727);
-
+    cl::Event inbuf_event;
+    cl_int err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/, &inbuf_event);
 #ifdef FPGADEBUG
-        printf("MIGRATEMEMOBJECTS inBufVec (host -> device) code: %d\n", err);
+    uint64_t duration = get_duration_ns(kernel_event);
+    printf("Argument load took %" PRIu64 "\n", duration);
+    printf("MIGRATEMEMOBJECTS inBufVec (host -> device) code: %d\n", err);
 #endif
+    check(err, 757);
 
     err = q.enqueueMigrateMemObjects(outBufVec,0);
-    check(err, 734);
+    check(err, 760);
 
 #ifdef FPGADEBUG
         printf("MIGRATEMEMOBJECTS outBufVec (host -> device) code: %d\n", err);
@@ -780,18 +789,25 @@ int fpgacall(
 #endif
 
     //Launch the Kernel
-    q.enqueueNDRangeKernel(
+    cl::Event kernel_event;
+    cl_int krnl_err = q.enqueueNDRangeKernel(
         krnl_hist_add, //kernel
         {1},    //work_dim (offset)
         {work_size},   //work_size (global)
         {1}     //work_size (local)
-        );
+        &kernel_event);
+
+#ifdef FPGADEBUG
+    duration = get_duration_ns(kernel_event);
+    printf("Kernel took %" PRIu64 "\n", duration);
+#endif
+    check(krnl_err, 804)
 
     // The result of the previous kernel execution will need to be retrieved in
     // order to view the results. This call will write the data from the
     // buffer_result cl_mem object to the source_results vector
     err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
-    check(err, 777);
+    check(err, 810);
 
 #ifdef FPGADEBUG
         printf("MIGRATEMEMOBJECTS outBufVec (host <- device) code: %d\n", err);
@@ -817,13 +833,6 @@ int fpgacall(
             histogram_hessian[i] = sum_hessians[i];
         }
     }
-
-    //release kernel and program
-    //check(clReleaseMemObject(buffer_result));
-    check(clReleaseKernel(krnl_hist_add));
-    check(clReleaseProgram(program));
-    check(clReleaseCommandQueue(q));
-    check(clReleaseContext(context));
 
 #ifdef ONETHREAD
     mtx.unlock();
