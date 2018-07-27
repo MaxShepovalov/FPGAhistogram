@@ -162,6 +162,7 @@ cl::Program program;
 
 //thread control
 std::mutex mtx;
+int iteration = 0;
 
 bool device_setup = false;
 #ifdef FPGADEBUG
@@ -584,6 +585,8 @@ int fpgacall(
     mtx.lock();
 #endif
 
+    iteration++;
+    printf("\n\nFPGACALL call #%d==================\n\n", iteration);
     bool precheck = true;
     int work_size = mode & DATAINDICES ? index_size : data_size;
 
@@ -775,7 +778,7 @@ int fpgacall(
     printf("Argument load took %"PRIu64"\n", duration);
     printf("MIGRATEMEMOBJECTS inBufVec (host -> device) code: %d\n", err);
 #endif
-    check(err, 774);
+    check(err, 781);
 
     cl::Event outbuf_event;
     err = q.enqueueMigrateMemObjects(outBufVec,0,NULL,&outbuf_event);
@@ -785,7 +788,7 @@ int fpgacall(
     printf("Output preload took %"PRIu64"\n", duration);
     printf("MIGRATEMEMOBJECTS inBufVec (host -> device) code: %d\n", err);
 #endif
-    check(err, 784);
+    check(err, 791);
 
 #ifdef FPGADEBUG
         printf("MIGRATEMEMOBJECTS outBufVec (host -> device) code: %d\n", err);
@@ -832,14 +835,14 @@ int fpgacall(
     duration = get_duration_ns(kernel_event);
     printf("Kernel took %"PRIu64"\n", duration);
 #endif
-    check(krnl_err, 831);
+    check(krnl_err, 838);
 
     // The result of the previous kernel execution will need to be retrieved in
     // order to view the results. This call will write the data from the
     // buffer_result cl_mem object to the source_results vector
     err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
     q.finish();
-    check(err, 838);
+    check(err, 845);
 
 #ifdef FPGADEBUG
         printf("MIGRATEMEMOBJECTS outBufVec (host <- device) code: %d\n", err);
