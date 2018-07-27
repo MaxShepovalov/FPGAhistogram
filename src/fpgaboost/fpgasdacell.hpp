@@ -765,15 +765,23 @@ int fpgacall(
     // load data vector from the host to the FPGA
     cl::Event inbuf_event;
     cl_int err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/, NULL, &inbuf_event);
+    q.finish();
 #ifdef FPGADEBUG
     uint64_t duration = get_duration_ns(inbuf_event);
     printf("Argument load took %"PRIu64"\n", duration);
     printf("MIGRATEMEMOBJECTS inBufVec (host -> device) code: %d\n", err);
 #endif
-    check(err, 763);
+    check(err, 774);
 
-    err = q.enqueueMigrateMemObjects(outBufVec,0);
-    check(err, 760);
+    cl::Event outbuf_event;
+    err = q.enqueueMigrateMemObjects(outBufVec,0,NULL,&outbuf_event);
+    q.finish();
+#ifdef FPGADEBUG
+    uint64_t duration = get_duration_ns(outbuf_event);
+    printf("Output preload took %"PRIu64"\n", duration);
+    printf("MIGRATEMEMOBJECTS inBufVec (host -> device) code: %d\n", err);
+#endif
+    check(err, 784);
 
 #ifdef FPGADEBUG
         printf("MIGRATEMEMOBJECTS outBufVec (host -> device) code: %d\n", err);
@@ -814,18 +822,20 @@ int fpgacall(
         {1},     //work_size (local)
         NULL,
         &kernel_event);
+    q.finish();
 
 #ifdef FPGADEBUG
     duration = get_duration_ns(kernel_event);
     printf("Kernel took %"PRIu64"\n", duration);
 #endif
-    check(krnl_err, 804);
+    check(krnl_err, 831);
 
     // The result of the previous kernel execution will need to be retrieved in
     // order to view the results. This call will write the data from the
     // buffer_result cl_mem object to the source_results vector
     err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
-    check(err, 810);
+    q.finish();
+    check(err, 838);
 
 #ifdef FPGADEBUG
         printf("MIGRATEMEMOBJECTS outBufVec (host <- device) code: %d\n", err);
@@ -836,9 +846,9 @@ int fpgacall(
 #ifdef FPGADEBUG
         printf("====RESULTS\n");
         printf("mode = %d\n", mode);
-        printArray<int>(histogram, histogram_size, "hist");
-        printArray<float>(sum_gradients, histogram_size, "sum_grad");
-        printArray<float>(sum_hessians, histogram_size, "sum_hess");
+        printArray<int>(histogram, min(histogram_size,10), "hist");
+        printArray<float>(sum_gradients, min(histogram_size,10), "sum_grad");
+        printArray<float>(sum_hessians, min(histogram_size,10), "sum_hess");
 #endif
 
     //move out data
