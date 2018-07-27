@@ -2,6 +2,7 @@
 
 #ifndef FPGASDACELL
 #define FPGASDACELL
+#define __STDC_FORMAT_MACROS
 
 #include <vector>
 #include <iostream>
