@@ -750,8 +750,8 @@ int fpgacall(
     cl::Event inbuf_event;
     cl_int err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/, NULL, &inbuf_event);
 #ifdef FPGADEBUG
-    uint64_t duration = get_duration_ns(kernel_event);
-    printf("Argument load took %" PRIu64 "\n", duration);
+    uint64_t duration = get_duration_ns(inbuf_event);
+    printf("Argument load took %"PRIu64"\n", duration);
     printf("MIGRATEMEMOBJECTS inBufVec (host -> device) code: %d\n", err);
 #endif
     check(err, 757);
@@ -800,7 +800,7 @@ int fpgacall(
 
 #ifdef FPGADEBUG
     duration = get_duration_ns(kernel_event);
-    printf("Kernel took %" PRIu64 "\n", duration);
+    printf("Kernel took %"PRIu64"\n", duration);
 #endif
     check(krnl_err, 804)
 
