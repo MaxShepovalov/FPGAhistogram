@@ -29,6 +29,10 @@ using std::vector;
 
 //#define USE_OLD_FPGACALL //use "always-load-parameters" fpgacall
 
+template <class T> const T& min (const T& a, const T& b) {
+  return !(b<a)?a:b;     // or: return !comp(b,a)?a:b; for version (2)
+}
+
 void check(cl_int err, int linenum) {
   if (err) {
     printf("ERROR at line %d: Operation Failed: %d\n", linenum, err);
