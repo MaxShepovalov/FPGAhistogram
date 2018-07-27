@@ -804,7 +804,7 @@ int fpgacall(
     duration = get_duration_ns(kernel_event);
     printf("Kernel took %"PRIu64"\n", duration);
 #endif
-    check(krnl_err, 804)
+    check(krnl_err, 804);
 
     // The result of the previous kernel execution will need to be retrieved in
     // order to view the results. This call will write the data from the
