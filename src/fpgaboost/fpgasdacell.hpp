@@ -777,7 +777,7 @@ int fpgacall(
     err = q.enqueueMigrateMemObjects(outBufVec,0,NULL,&outbuf_event);
     q.finish();
 #ifdef FPGADEBUG
-    uint64_t duration = get_duration_ns(outbuf_event);
+    duration = get_duration_ns(outbuf_event);
     printf("Output preload took %"PRIu64"\n", duration);
     printf("MIGRATEMEMOBJECTS inBufVec (host -> device) code: %d\n", err);
 #endif
