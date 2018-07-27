@@ -34,6 +34,9 @@ void check(cl_int err, int linenum) {
     printf("ERROR at line %d: Operation Failed: %d\n", linenum, err);
     exit(EXIT_FAILURE);
   }
+#ifdef FPGADEBUG
+  printf("Line %d status: %d\n", linenum, err);
+#endif
 }
 
 uint64_t get_duration_ns (const cl::Event &event) {
@@ -628,6 +631,9 @@ int fpgacall(
     cl::Program::Binaries binary_file = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     program = cl::Program(context, devices, binary_file);
+    #ifdef FPGADEBUG
+    printf("Program set\n");
+    #endif
 /////////////////////////////////////////////////////////////////////////////////////////////
 
     //compute the size of array in bytes
@@ -685,10 +691,14 @@ int fpgacall(
 #ifdef FPGADEBUG
         printf("=OLD_FPGGACALL_VERSION====\nINPUTS:\n");
         //printArray<VAL_T>(bins, data_size, "data");
-        printArray<VAL_T>(data_pointer, data_size, "data");
-        printArray<int>(indices, index_size, "indices");
-        printArray<float>(gradients, data_size, "gradients");
-        printArray<float>(hessians, data_size, "hessians");
+        //printArray<VAL_T>(data_pointer, data_size, "data");
+        //printArray<int>(indices, index_size, "indices");
+        //printArray<float>(gradients, data_size, "gradients");
+        //printArray<float>(hessians, data_size, "hessians");
+        printArray<VAL_T>(data_pointer, min(data_size,10), "data");
+        printArray<int>(indices, min(index_size, 10), "indices");
+        printArray<float>(gradients, min(data_size, 10), "gradients");
+        printArray<float>(hessians, min(data_size, 10), "hessians");
         VAL_T k;
         printf("Size of VAL_T: %d and type of %s\n=====\n", sizeof(VAL_T), typeid(k).name());
         unsigned char uc;
@@ -756,7 +766,7 @@ int fpgacall(
     printf("Argument load took %"PRIu64"\n", duration);
     printf("MIGRATEMEMOBJECTS inBufVec (host -> device) code: %d\n", err);
 #endif
-    check(err, 757);
+    check(err, 763);
 
     err = q.enqueueMigrateMemObjects(outBufVec,0);
     check(err, 760);
