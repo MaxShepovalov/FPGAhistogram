@@ -586,7 +586,9 @@ int fpgacall(
 #endif
 
     iteration++;
+#ifdef FPGADEBUG
     printf("\n\nFPGACALL call #%d==================\n\n", iteration);
+#endif
     bool precheck = true;
     int work_size = mode & DATAINDICES ? index_size : data_size;
 
