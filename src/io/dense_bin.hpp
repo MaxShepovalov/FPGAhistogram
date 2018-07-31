@@ -309,7 +309,7 @@ public:
     for (int i=0; i<hist_size; i++){
       bool count_ok = out[i].cnt == hist[i];
       bool grad_ok = out[i].sum_gradients == hgrad[i];
-      if (count_ok and hess_ok and grad_ok){
+      if (count_ok and grad_ok){
         continue;
       } else {
         printf("Mismatch at bin %d:", i);
