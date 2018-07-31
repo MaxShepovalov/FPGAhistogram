@@ -147,10 +147,10 @@ public:
       if (count_ok and hess_ok and grad_ok){
         continue;
       } else {
-        printf("Mismatch at bin %d:", i);
-        if (!count_ok){ printf("    count    cpu:%d fpga:%d", out[i].cnt,hist[i]);}
-        if (!hess_ok){ printf("    hessian  cpu:%d fpga:%d", out[i].sum_hessians,hhess[i]);}
-        if (!grad_ok){ printf("    gradient cpu:%d fpga:%d", out[i].sum_gradients,hgrad[i]);}
+        printf("Mismatch at bin %d:\n", i);
+        if (!count_ok){ printf("    count    cpu:%d fpga:%d\n", out[i].cnt,hist[i]);}
+        if (!hess_ok){ printf("    hessian  cpu:%d fpga:%d\n", out[i].sum_hessians,hhess[i]);}
+        if (!grad_ok){ printf("    gradient cpu:%d fpga:%d\n", out[i].sum_gradients,hgrad[i]);}
       }
     }
 #endif
@@ -234,10 +234,10 @@ public:
       if (count_ok and hess_ok and grad_ok){
         continue;
       } else {
-        printf("Mismatch at bin %d:", i);
-        if (!count_ok){ printf("    count    cpu:%d fpga:%d", out[i].cnt,hist[i]);}
-        if (!hess_ok){ printf("    hessian  cpu:%d fpga:%d", out[i].sum_hessians,hhess[i]);}
-        if (!grad_ok){ printf("    gradient cpu:%d fpga:%d", out[i].sum_gradients,hgrad[i]);}
+        printf("Mismatch at bin %d:\n", i);
+        if (!count_ok){ printf("    count    cpu:%d fpga:%d\n", out[i].cnt,hist[i]);}
+        if (!hess_ok){ printf("    hessian  cpu:%d fpga:%d\n", out[i].sum_hessians,hhess[i]);}
+        if (!grad_ok){ printf("    gradient cpu:%d fpga:%d\n", out[i].sum_gradients,hgrad[i]);}
       }
     }
 #endif
@@ -312,9 +312,9 @@ public:
       if (count_ok and grad_ok){
         continue;
       } else {
-        printf("Mismatch at bin %d:", i);
-        if (!count_ok){ printf("    count    cpu:%d fpga:%d", out[i].cnt,hist[i]);}
-        if (!grad_ok){ printf("    gradient cpu:%d fpga:%d", out[i].sum_gradients,hgrad[i]);}
+        printf("Mismatch at bin %d:\n", i);
+        if (!count_ok){ printf("    count    cpu:%d fpga:%d\n", out[i].cnt,hist[i]);}
+        if (!grad_ok){ printf("    gradient cpu:%d fpga:%d\n", out[i].sum_gradients,hgrad[i]);}
       }
     }
 #endif
