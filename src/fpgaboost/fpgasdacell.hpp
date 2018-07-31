@@ -802,7 +802,9 @@ int fpgacall(
     //set the kernel Arguments
     int narg=0;
     int items_per_call = 1;
+    //int number_of_kernels = work_size / 64;
     krnl_hist_add.setArg(narg++, items_per_call);//amount of data per one instance of a kernel
+    krnl_hist_add.setArg(narg++, work_size);//total size of work
     krnl_hist_add.setArg(narg++, buffer_bins);//input bin indices
     krnl_hist_add.setArg(narg++, buffer_inds);//input data indices
     krnl_hist_add.setArg(narg++, buffer_grad);//input gradients
@@ -826,9 +828,9 @@ int fpgacall(
     cl::Event kernel_event;
     cl_int krnl_err = q.enqueueNDRangeKernel(
         krnl_hist_add, //kernel
-        {1},    //work_dim (offset)
-        {work_size},   //work_size (global)
-        {1},     //work_size (local)
+        {1},         //work_dim (offset)
+        {work_size}, //work_size (global)
+        {1},         //work_size (local)
         NULL,
         &kernel_event);
     q.finish();
