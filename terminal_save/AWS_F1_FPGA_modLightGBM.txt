@@ -1,0 +1,618 @@
+sh-4.2# ./lightgbm config=train.conf
+[LightGBM] [Info] Finished loading parameters
+[LightGBM] [Info] Loading weights...
+[LightGBM] [Info] Loading weights...
+[LightGBM] [Info] Finished loading data in 0.197009 seconds
+[LightGBM] [Info] Number of positive: 3716, number of negative: 3284
+[LightGBM] [Info] Total Bins 6143
+[LightGBM] [Info] Number of data: 7000, number of used features: 28
+[LightGBM] [Info] Finished initializing training
+[LightGBM] [Info] Started training...
+[0]user:0xf010:0x1d51:[xocl:2017.4.5:128]
+xclProbe found 1 FPGA slots with xocl driver running
+platform Name: Xilinx
+Vendor Name : Xilinx
+Found Platform
+XCLBIN File Name: histogram
+INFO: Importing ./histogram.hw.xilinx_aws-vu9p-f1-04261818_dynamic_5_0.awsxclbin
+Loading: './histogram.hw.xilinx_aws-vu9p-f1-04261818_dynamic_5_0.awsxclbin'
+This AFI already loaded. Skip reload!
+Successfully skipped reloading of local image.
+[LightGBM] [Info] Iteration:1, training auc : 0.491379
+[LightGBM] [Info] Iteration:1, training binary_logloss : 0.708138
+[LightGBM] [Info] Iteration:1, valid_1 auc : 0.485786
+[LightGBM] [Info] Iteration:1, valid_1 binary_logloss : 0.708308
+[LightGBM] [Info] 38.675599 seconds elapsed, finished iteration 1
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:2, training auc : 0.489809
+[LightGBM] [Info] Iteration:2, training binary_logloss : 0.743745
+[LightGBM] [Info] Iteration:2, valid_1 auc : 0.442273
+[LightGBM] [Info] Iteration:2, valid_1 binary_logloss : 0.766259
+[LightGBM] [Info] 74.737327 seconds elapsed, finished iteration 2
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:3, training auc : 0.484999
+[LightGBM] [Info] Iteration:3, training binary_logloss : 0.821707
+[LightGBM] [Info] Iteration:3, valid_1 auc : 0.456148
+[LightGBM] [Info] Iteration:3, valid_1 binary_logloss : 0.853665
+[LightGBM] [Info] 109.350271 seconds elapsed, finished iteration 3
+[LightGBM] [Info] Iteration:4, training auc : 0.491965
+[LightGBM] [Info] Iteration:4, training binary_logloss : 0.924542
+[LightGBM] [Info] Iteration:4, valid_1 auc : 0.4643
+[LightGBM] [Info] Iteration:4, valid_1 binary_logloss : 0.968422
+[LightGBM] [Info] 147.430289 seconds elapsed, finished iteration 4
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:5, training auc : 0.506736
+[LightGBM] [Info] Iteration:5, training binary_logloss : 0.962619
+[LightGBM] [Info] Iteration:5, valid_1 auc : 0.458349
+[LightGBM] [Info] Iteration:5, valid_1 binary_logloss : 1.03048
+[LightGBM] [Info] 174.335197 seconds elapsed, finished iteration 5
+[LightGBM] [Info] Iteration:6, training auc : 0.510345
+[LightGBM] [Info] Iteration:6, training binary_logloss : 1.00428
+[LightGBM] [Info] Iteration:6, valid_1 auc : 0.457495
+[LightGBM] [Info] Iteration:6, valid_1 binary_logloss : 1.06195
+[LightGBM] [Info] 211.742443 seconds elapsed, finished iteration 6
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:7, training auc : 0.512884
+[LightGBM] [Info] Iteration:7, training binary_logloss : 1.07188
+[LightGBM] [Info] Iteration:7, valid_1 auc : 0.45822
+[LightGBM] [Info] Iteration:7, valid_1 binary_logloss : 1.11368
+[LightGBM] [Info] 242.493390 seconds elapsed, finished iteration 7
+[LightGBM] [Info] Iteration:8, training auc : 0.516019
+[LightGBM] [Info] Iteration:8, training binary_logloss : 1.13401
+[LightGBM] [Info] Iteration:8, valid_1 auc : 0.470266
+[LightGBM] [Info] Iteration:8, valid_1 binary_logloss : 1.1578
+[LightGBM] [Info] 280.690718 seconds elapsed, finished iteration 8
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:9, training auc : 0.515661
+[LightGBM] [Info] Iteration:9, training binary_logloss : 1.37467
+[LightGBM] [Info] Iteration:9, valid_1 auc : 0.451238
+[LightGBM] [Info] Iteration:9, valid_1 binary_logloss : 1.44462
+[LightGBM] [Info] 308.635170 seconds elapsed, finished iteration 9
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:10, training auc : 0.51765
+[LightGBM] [Info] Iteration:10, training binary_logloss : 1.39088
+[LightGBM] [Info] Iteration:10, valid_1 auc : 0.450593
+[LightGBM] [Info] Iteration:10, valid_1 binary_logloss : 1.48444
+[LightGBM] [Info] 339.859430 seconds elapsed, finished iteration 10
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:11, training auc : 0.514966
+[LightGBM] [Info] Iteration:11, training binary_logloss : 1.40717
+[LightGBM] [Info] Iteration:11, valid_1 auc : 0.458349
+[LightGBM] [Info] Iteration:11, valid_1 binary_logloss : 1.4687
+[LightGBM] [Info] 374.787672 seconds elapsed, finished iteration 11
+[LightGBM] [Info] Iteration:12, training auc : 0.514901
+[LightGBM] [Info] Iteration:12, training binary_logloss : 1.45534
+[LightGBM] [Info] Iteration:12, valid_1 auc : 0.461558
+[LightGBM] [Info] Iteration:12, valid_1 binary_logloss : 1.5116
+[LightGBM] [Info] 412.833974 seconds elapsed, finished iteration 12
+[LightGBM] [Info] Iteration:13, training auc : 0.517279
+[LightGBM] [Info] Iteration:13, training binary_logloss : 1.47695
+[LightGBM] [Info] Iteration:13, valid_1 auc : 0.473958
+[LightGBM] [Info] Iteration:13, valid_1 binary_logloss : 1.50088
+[LightGBM] [Info] 449.862870 seconds elapsed, finished iteration 13
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:14, training auc : 0.526964
+[LightGBM] [Info] Iteration:14, training binary_logloss : 1.46048
+[LightGBM] [Info] Iteration:14, valid_1 auc : 0.485036
+[LightGBM] [Info] Iteration:14, valid_1 binary_logloss : 1.51928
+[LightGBM] [Info] 474.870694 seconds elapsed, finished iteration 14
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:15, training auc : 0.527891
+[LightGBM] [Info] Iteration:15, training binary_logloss : 1.45758
+[LightGBM] [Info] Iteration:15, valid_1 auc : 0.491744
+[LightGBM] [Info] Iteration:15, valid_1 binary_logloss : 1.52703
+[LightGBM] [Info] 502.492860 seconds elapsed, finished iteration 15
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:16, training auc : 0.534489
+[LightGBM] [Info] Iteration:16, training binary_logloss : 1.42917
+[LightGBM] [Info] Iteration:16, valid_1 auc : 0.495404
+[LightGBM] [Info] Iteration:16, valid_1 binary_logloss : 1.514
+[LightGBM] [Info] 529.375004 seconds elapsed, finished iteration 16
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:17, training auc : 0.533654
+[LightGBM] [Info] Iteration:17, training binary_logloss : 1.40503
+[LightGBM] [Info] Iteration:17, valid_1 auc : 0.476651
+[LightGBM] [Info] Iteration:17, valid_1 binary_logloss : 1.52403
+[LightGBM] [Info] 561.983121 seconds elapsed, finished iteration 17
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:18, training auc : 0.529446
+[LightGBM] [Info] Iteration:18, training binary_logloss : 1.4327
+[LightGBM] [Info] Iteration:18, valid_1 auc : 0.474571
+[LightGBM] [Info] Iteration:18, valid_1 binary_logloss : 1.55881
+[LightGBM] [Info] 594.999352 seconds elapsed, finished iteration 18
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:19, training auc : 0.528581
+[LightGBM] [Info] Iteration:19, training binary_logloss : 1.49396
+[LightGBM] [Info] Iteration:19, valid_1 auc : 0.471894
+[LightGBM] [Info] Iteration:19, valid_1 binary_logloss : 1.63798
+[LightGBM] [Info] 622.734567 seconds elapsed, finished iteration 19
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:20, training auc : 0.529348
+[LightGBM] [Info] Iteration:20, training binary_logloss : 1.58754
+[LightGBM] [Info] Iteration:20, valid_1 auc : 0.484182
+[LightGBM] [Info] Iteration:20, valid_1 binary_logloss : 1.72755
+[LightGBM] [Info] 659.988462 seconds elapsed, finished iteration 20
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:21, training auc : 0.532821
+[LightGBM] [Info] Iteration:21, training binary_logloss : 1.61721
+[LightGBM] [Info] Iteration:21, valid_1 auc : 0.485794
+[LightGBM] [Info] Iteration:21, valid_1 binary_logloss : 1.74614
+[LightGBM] [Info] 685.300405 seconds elapsed, finished iteration 21
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:22, training auc : 0.524514
+[LightGBM] [Info] Iteration:22, training binary_logloss : 1.77176
+[LightGBM] [Info] Iteration:22, valid_1 auc : 0.464993
+[LightGBM] [Info] Iteration:22, valid_1 binary_logloss : 1.94605
+[LightGBM] [Info] 716.329552 seconds elapsed, finished iteration 22
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:23, training auc : 0.518732
+[LightGBM] [Info] Iteration:23, training binary_logloss : 2.36559
+[LightGBM] [Info] Iteration:23, valid_1 auc : 0.474845
+[LightGBM] [Info] Iteration:23, valid_1 binary_logloss : 2.49155
+[LightGBM] [Info] 744.081829 seconds elapsed, finished iteration 23
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:24, training auc : 0.515416
+[LightGBM] [Info] Iteration:24, training binary_logloss : 2.53579
+[LightGBM] [Info] Iteration:24, valid_1 auc : 0.47212
+[LightGBM] [Info] Iteration:24, valid_1 binary_logloss : 2.69286
+[LightGBM] [Info] 771.352018 seconds elapsed, finished iteration 24
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:25, training auc : 0.512542
+[LightGBM] [Info] Iteration:25, training binary_logloss : 2.73901
+[LightGBM] [Info] Iteration:25, valid_1 auc : 0.4742
+[LightGBM] [Info] Iteration:25, valid_1 binary_logloss : 2.97617
+[LightGBM] [Info] 791.464241 seconds elapsed, finished iteration 25
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:26, training auc : 0.513489
+[LightGBM] [Info] Iteration:26, training binary_logloss : 2.79449
+[LightGBM] [Info] Iteration:26, valid_1 auc : 0.476603
+[LightGBM] [Info] Iteration:26, valid_1 binary_logloss : 2.98513
+[LightGBM] [Info] 814.515225 seconds elapsed, finished iteration 26
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:27, training auc : 0.515293
+[LightGBM] [Info] Iteration:27, training binary_logloss : 2.85343
+[LightGBM] [Info] Iteration:27, valid_1 auc : 0.480763
+[LightGBM] [Info] Iteration:27, valid_1 binary_logloss : 3.04135
+[LightGBM] [Info] 834.139794 seconds elapsed, finished iteration 27
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:28, training auc : 0.516966
+[LightGBM] [Info] Iteration:28, training binary_logloss : 3.06275
+[LightGBM] [Info] Iteration:28, valid_1 auc : 0.477135
+[LightGBM] [Info] Iteration:28, valid_1 binary_logloss : 3.29663
+[LightGBM] [Info] 855.652299 seconds elapsed, finished iteration 28
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:29, training auc : 0.515766
+[LightGBM] [Info] Iteration:29, training binary_logloss : 3.37718
+[LightGBM] [Info] Iteration:29, valid_1 auc : 0.480908
+[LightGBM] [Info] Iteration:29, valid_1 binary_logloss : 3.63901
+[LightGBM] [Info] 875.734823 seconds elapsed, finished iteration 29
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:30, training auc : 0.513479
+[LightGBM] [Info] Iteration:30, training binary_logloss : 3.21478
+[LightGBM] [Info] Iteration:30, valid_1 auc : 0.476458
+[LightGBM] [Info] Iteration:30, valid_1 binary_logloss : 3.45245
+[LightGBM] [Info] 893.983868 seconds elapsed, finished iteration 30
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:31, training auc : 0.514039
+[LightGBM] [Info] Iteration:31, training binary_logloss : 3.11492
+[LightGBM] [Info] Iteration:31, valid_1 auc : 0.476038
+[LightGBM] [Info] Iteration:31, valid_1 binary_logloss : 3.32023
+[LightGBM] [Info] 915.363098 seconds elapsed, finished iteration 31
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:32, training auc : 0.512121
+[LightGBM] [Info] Iteration:32, training binary_logloss : 3.13697
+[LightGBM] [Info] Iteration:32, valid_1 auc : 0.472894
+[LightGBM] [Info] Iteration:32, valid_1 binary_logloss : 3.32643
+[LightGBM] [Info] 937.279163 seconds elapsed, finished iteration 32
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:33, training auc : 0.517072
+[LightGBM] [Info] Iteration:33, training binary_logloss : 3.07008
+[LightGBM] [Info] Iteration:33, valid_1 auc : 0.477715
+[LightGBM] [Info] Iteration:33, valid_1 binary_logloss : 3.26247
+[LightGBM] [Info] 961.647635 seconds elapsed, finished iteration 33
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:34, training auc : 0.517808
+[LightGBM] [Info] Iteration:34, training binary_logloss : 3.0152
+[LightGBM] [Info] Iteration:34, valid_1 auc : 0.483795
+[LightGBM] [Info] Iteration:34, valid_1 binary_logloss : 3.09907
+[LightGBM] [Info] 985.720882 seconds elapsed, finished iteration 34
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:35, training auc : 0.517464
+[LightGBM] [Info] Iteration:35, training binary_logloss : 2.98099
+[LightGBM] [Info] Iteration:35, valid_1 auc : 0.481795
+[LightGBM] [Info] Iteration:35, valid_1 binary_logloss : 3.03408
+[LightGBM] [Info] 1005.892790 seconds elapsed, finished iteration 35
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:36, training auc : 0.520193
+[LightGBM] [Info] Iteration:36, training binary_logloss : 2.96466
+[LightGBM] [Info] Iteration:36, valid_1 auc : 0.497033
+[LightGBM] [Info] Iteration:36, valid_1 binary_logloss : 2.90504
+[LightGBM] [Info] 1029.491317 seconds elapsed, finished iteration 36
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:37, training auc : 0.517093
+[LightGBM] [Info] Iteration:37, training binary_logloss : 3.02281
+[LightGBM] [Info] Iteration:37, valid_1 auc : 0.494485
+[LightGBM] [Info] Iteration:37, valid_1 binary_logloss : 2.95057
+[LightGBM] [Info] 1049.347046 seconds elapsed, finished iteration 37
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:38, training auc : 0.517625
+[LightGBM] [Info] Iteration:38, training binary_logloss : 3.08673
+[LightGBM] [Info] Iteration:38, valid_1 auc : 0.493082
+[LightGBM] [Info] Iteration:38, valid_1 binary_logloss : 3.02068
+[LightGBM] [Info] 1070.094610 seconds elapsed, finished iteration 38
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:39, training auc : 0.519516
+[LightGBM] [Info] Iteration:39, training binary_logloss : 3.14294
+[LightGBM] [Info] Iteration:39, valid_1 auc : 0.495985
+[LightGBM] [Info] Iteration:39, valid_1 binary_logloss : 3.08951
+[LightGBM] [Info] 1091.841785 seconds elapsed, finished iteration 39
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:40, training auc : 0.518065
+[LightGBM] [Info] Iteration:40, training binary_logloss : 3.16039
+[LightGBM] [Info] Iteration:40, valid_1 auc : 0.492373
+[LightGBM] [Info] Iteration:40, valid_1 binary_logloss : 3.10824
+[LightGBM] [Info] 1113.171988 seconds elapsed, finished iteration 40
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:41, training auc : 0.519902
+[LightGBM] [Info] Iteration:41, training binary_logloss : 3.10826
+[LightGBM] [Info] Iteration:41, valid_1 auc : 0.49226
+[LightGBM] [Info] Iteration:41, valid_1 binary_logloss : 3.06716
+[LightGBM] [Info] 1133.049246 seconds elapsed, finished iteration 41
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:42, training auc : 0.519063
+[LightGBM] [Info] Iteration:42, training binary_logloss : 3.16624
+[LightGBM] [Info] Iteration:42, valid_1 auc : 0.49376
+[LightGBM] [Info] Iteration:42, valid_1 binary_logloss : 3.13495
+[LightGBM] [Info] 1155.364341 seconds elapsed, finished iteration 42
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:43, training auc : 0.518546
+[LightGBM] [Info] Iteration:43, training binary_logloss : 3.26602
+[LightGBM] [Info] Iteration:43, valid_1 auc : 0.498791
+[LightGBM] [Info] Iteration:43, valid_1 binary_logloss : 3.21766
+[LightGBM] [Info] 1175.246265 seconds elapsed, finished iteration 43
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:44, training auc : 0.519911
+[LightGBM] [Info] Iteration:44, training binary_logloss : 3.26892
+[LightGBM] [Info] Iteration:44, valid_1 auc : 0.50029
+[LightGBM] [Info] Iteration:44, valid_1 binary_logloss : 3.23685
+[LightGBM] [Info] 1196.497786 seconds elapsed, finished iteration 44
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:45, training auc : 0.518711
+[LightGBM] [Info] Iteration:45, training binary_logloss : 3.36392
+[LightGBM] [Info] Iteration:45, valid_1 auc : 0.502306
+[LightGBM] [Info] Iteration:45, valid_1 binary_logloss : 3.31155
+[LightGBM] [Info] 1218.910370 seconds elapsed, finished iteration 45
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:46, training auc : 0.521681
+[LightGBM] [Info] Iteration:46, training binary_logloss : 3.40429
+[LightGBM] [Info] Iteration:46, valid_1 auc : 0.502225
+[LightGBM] [Info] Iteration:46, valid_1 binary_logloss : 3.41642
+[LightGBM] [Info] 1240.609531 seconds elapsed, finished iteration 46
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:47, training auc : 0.522113
+[LightGBM] [Info] Iteration:47, training binary_logloss : 3.43116
+[LightGBM] [Info] Iteration:47, valid_1 auc : 0.497001
+[LightGBM] [Info] Iteration:47, valid_1 binary_logloss : 3.47472
+[LightGBM] [Info] 1262.800877 seconds elapsed, finished iteration 47
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:48, training auc : 0.524923
+[LightGBM] [Info] Iteration:48, training binary_logloss : 3.49557
+[LightGBM] [Info] Iteration:48, valid_1 auc : 0.494792
+[LightGBM] [Info] Iteration:48, valid_1 binary_logloss : 3.60009
+[LightGBM] [Info] 1286.206573 seconds elapsed, finished iteration 48
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:49, training auc : 0.528584
+[LightGBM] [Info] Iteration:49, training binary_logloss : 3.5268
+[LightGBM] [Info] Iteration:49, valid_1 auc : 0.494421
+[LightGBM] [Info] Iteration:49, valid_1 binary_logloss : 3.67076
+[LightGBM] [Info] 1310.225086 seconds elapsed, finished iteration 49
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:50, training auc : 0.532069
+[LightGBM] [Info] Iteration:50, training binary_logloss : 3.6699
+[LightGBM] [Info] Iteration:50, valid_1 auc : 0.499597
+[LightGBM] [Info] Iteration:50, valid_1 binary_logloss : 3.8204
+[LightGBM] [Info] 1334.264707 seconds elapsed, finished iteration 50
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:51, training auc : 0.534548
+[LightGBM] [Info] Iteration:51, training binary_logloss : 3.61643
+[LightGBM] [Info] Iteration:51, valid_1 auc : 0.493421
+[LightGBM] [Info] Iteration:51, valid_1 binary_logloss : 3.84042
+[LightGBM] [Info] 1352.810155 seconds elapsed, finished iteration 51
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:52, training auc : 0.534943
+[LightGBM] [Info] Iteration:52, training binary_logloss : 3.61432
+[LightGBM] [Info] Iteration:52, valid_1 auc : 0.489454
+[LightGBM] [Info] Iteration:52, valid_1 binary_logloss : 3.86363
+[LightGBM] [Info] 1374.240252 seconds elapsed, finished iteration 52
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:53, training auc : 0.536421
+[LightGBM] [Info] Iteration:53, training binary_logloss : 3.54931
+[LightGBM] [Info] Iteration:53, valid_1 auc : 0.494066
+[LightGBM] [Info] Iteration:53, valid_1 binary_logloss : 3.78128
+[LightGBM] [Info] 1396.859516 seconds elapsed, finished iteration 53
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:54, training auc : 0.538202
+[LightGBM] [Info] Iteration:54, training binary_logloss : 3.57345
+[LightGBM] [Info] Iteration:54, valid_1 auc : 0.492712
+[LightGBM] [Info] Iteration:54, valid_1 binary_logloss : 3.81351
+[LightGBM] [Info] 1417.970576 seconds elapsed, finished iteration 54
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:55, training auc : 0.539533
+[LightGBM] [Info] Iteration:55, training binary_logloss : 3.58134
+[LightGBM] [Info] Iteration:55, valid_1 auc : 0.492857
+[LightGBM] [Info] Iteration:55, valid_1 binary_logloss : 3.82366
+[LightGBM] [Info] 1442.362376 seconds elapsed, finished iteration 55
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:56, training auc : 0.542487
+[LightGBM] [Info] Iteration:56, training binary_logloss : 3.61876
+[LightGBM] [Info] Iteration:56, valid_1 auc : 0.503015
+[LightGBM] [Info] Iteration:56, valid_1 binary_logloss : 3.79501
+[LightGBM] [Info] 1463.369836 seconds elapsed, finished iteration 56
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:57, training auc : 0.543791
+[LightGBM] [Info] Iteration:57, training binary_logloss : 3.65152
+[LightGBM] [Info] Iteration:57, valid_1 auc : 0.501677
+[LightGBM] [Info] Iteration:57, valid_1 binary_logloss : 3.82573
+[LightGBM] [Info] 1484.602880 seconds elapsed, finished iteration 57
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:58, training auc : 0.545001
+[LightGBM] [Info] Iteration:58, training binary_logloss : 3.75975
+[LightGBM] [Info] Iteration:58, valid_1 auc : 0.502241
+[LightGBM] [Info] Iteration:58, valid_1 binary_logloss : 3.93602
+[LightGBM] [Info] 1504.429975 seconds elapsed, finished iteration 58
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:59, training auc : 0.543555
+[LightGBM] [Info] Iteration:59, training binary_logloss : 3.97634
+[LightGBM] [Info] Iteration:59, valid_1 auc : 0.510659
+[LightGBM] [Info] Iteration:59, valid_1 binary_logloss : 4.03646
+[LightGBM] [Info] 1523.096149 seconds elapsed, finished iteration 59
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:60, training auc : 0.541833
+[LightGBM] [Info] Iteration:60, training binary_logloss : 4.29498
+[LightGBM] [Info] Iteration:60, valid_1 auc : 0.511497
+[LightGBM] [Info] Iteration:60, valid_1 binary_logloss : 4.3237
+[LightGBM] [Info] 1539.991424 seconds elapsed, finished iteration 60
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:61, training auc : 0.545506
+[LightGBM] [Info] Iteration:61, training binary_logloss : 4.48536
+[LightGBM] [Info] Iteration:61, valid_1 auc : 0.516979
+[LightGBM] [Info] Iteration:61, valid_1 binary_logloss : 4.49144
+[LightGBM] [Info] 1559.592891 seconds elapsed, finished iteration 61
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:62, training auc : 0.546323
+[LightGBM] [Info] Iteration:62, training binary_logloss : 4.47974
+[LightGBM] [Info] Iteration:62, valid_1 auc : 0.515077
+[LightGBM] [Info] Iteration:62, valid_1 binary_logloss : 4.46297
+[LightGBM] [Info] 1579.030597 seconds elapsed, finished iteration 62
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:63, training auc : 0.546846
+[LightGBM] [Info] Iteration:63, training binary_logloss : 4.46542
+[LightGBM] [Info] Iteration:63, valid_1 auc : 0.511046
+[LightGBM] [Info] Iteration:63, valid_1 binary_logloss : 4.50118
+[LightGBM] [Info] 1598.221750 seconds elapsed, finished iteration 63
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:64, training auc : 0.546875
+[LightGBM] [Info] Iteration:64, training binary_logloss : 4.44912
+[LightGBM] [Info] Iteration:64, valid_1 auc : 0.512561
+[LightGBM] [Info] Iteration:64, valid_1 binary_logloss : 4.48556
+[LightGBM] [Info] 1618.296809 seconds elapsed, finished iteration 64
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:65, training auc : 0.545785
+[LightGBM] [Info] Iteration:65, training binary_logloss : 4.4498
+[LightGBM] [Info] Iteration:65, valid_1 auc : 0.508062
+[LightGBM] [Info] Iteration:65, valid_1 binary_logloss : 4.51841
+[LightGBM] [Info] 1637.980619 seconds elapsed, finished iteration 65
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:66, training auc : 0.548504
+[LightGBM] [Info] Iteration:66, training binary_logloss : 4.45523
+[LightGBM] [Info] Iteration:66, valid_1 auc : 0.513271
+[LightGBM] [Info] Iteration:66, valid_1 binary_logloss : 4.51399
+[LightGBM] [Info] 1655.967106 seconds elapsed, finished iteration 66
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:67, training auc : 0.548203
+[LightGBM] [Info] Iteration:67, training binary_logloss : 4.39173
+[LightGBM] [Info] Iteration:67, valid_1 auc : 0.513174
+[LightGBM] [Info] Iteration:67, valid_1 binary_logloss : 4.44053
+[LightGBM] [Info] 1675.409052 seconds elapsed, finished iteration 67
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:68, training auc : 0.548344
+[LightGBM] [Info] Iteration:68, training binary_logloss : 4.34612
+[LightGBM] [Info] Iteration:68, valid_1 auc : 0.514238
+[LightGBM] [Info] Iteration:68, valid_1 binary_logloss : 4.42622
+[LightGBM] [Info] 1695.430793 seconds elapsed, finished iteration 68
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:69, training auc : 0.550985
+[LightGBM] [Info] Iteration:69, training binary_logloss : 4.33018
+[LightGBM] [Info] Iteration:69, valid_1 auc : 0.51856
+[LightGBM] [Info] Iteration:69, valid_1 binary_logloss : 4.44107
+[LightGBM] [Info] 1713.727478 seconds elapsed, finished iteration 69
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:70, training auc : 0.552238
+[LightGBM] [Info] Iteration:70, training binary_logloss : 4.31645
+[LightGBM] [Info] Iteration:70, valid_1 auc : 0.523413
+[LightGBM] [Info] Iteration:70, valid_1 binary_logloss : 4.44259
+[LightGBM] [Info] 1734.140750 seconds elapsed, finished iteration 70
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:71, training auc : 0.555159
+[LightGBM] [Info] Iteration:71, training binary_logloss : 4.26606
+[LightGBM] [Info] Iteration:71, valid_1 auc : 0.528751
+[LightGBM] [Info] Iteration:71, valid_1 binary_logloss : 4.38341
+[LightGBM] [Info] 1752.049106 seconds elapsed, finished iteration 71
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:72, training auc : 0.558237
+[LightGBM] [Info] Iteration:72, training binary_logloss : 4.26159
+[LightGBM] [Info] Iteration:72, valid_1 auc : 0.532121
+[LightGBM] [Info] Iteration:72, valid_1 binary_logloss : 4.41151
+[LightGBM] [Info] 1769.777313 seconds elapsed, finished iteration 72
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:73, training auc : 0.558082
+[LightGBM] [Info] Iteration:73, training binary_logloss : 4.2426
+[LightGBM] [Info] Iteration:73, valid_1 auc : 0.529105
+[LightGBM] [Info] Iteration:73, valid_1 binary_logloss : 4.44583
+[LightGBM] [Info] 1787.532794 seconds elapsed, finished iteration 73
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:74, training auc : 0.559939
+[LightGBM] [Info] Iteration:74, training binary_logloss : 4.31121
+[LightGBM] [Info] Iteration:74, valid_1 auc : 0.529879
+[LightGBM] [Info] Iteration:74, valid_1 binary_logloss : 4.54902
+[LightGBM] [Info] 1805.189802 seconds elapsed, finished iteration 74
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:75, training auc : 0.560583
+[LightGBM] [Info] Iteration:75, training binary_logloss : 4.52976
+[LightGBM] [Info] Iteration:75, valid_1 auc : 0.535926
+[LightGBM] [Info] Iteration:75, valid_1 binary_logloss : 4.68569
+[LightGBM] [Info] 1821.728614 seconds elapsed, finished iteration 75
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:76, training auc : 0.560325
+[LightGBM] [Info] Iteration:76, training binary_logloss : 4.59439
+[LightGBM] [Info] Iteration:76, valid_1 auc : 0.539587
+[LightGBM] [Info] Iteration:76, valid_1 binary_logloss : 4.69565
+[LightGBM] [Info] 1838.766922 seconds elapsed, finished iteration 76
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:77, training auc : 0.55912
+[LightGBM] [Info] Iteration:77, training binary_logloss : 4.58199
+[LightGBM] [Info] Iteration:77, valid_1 auc : 0.537829
+[LightGBM] [Info] Iteration:77, valid_1 binary_logloss : 4.67468
+[LightGBM] [Info] 1857.850007 seconds elapsed, finished iteration 77
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:78, training auc : 0.560148
+[LightGBM] [Info] Iteration:78, training binary_logloss : 4.57966
+[LightGBM] [Info] Iteration:78, valid_1 auc : 0.536571
+[LightGBM] [Info] Iteration:78, valid_1 binary_logloss : 4.69495
+[LightGBM] [Info] 1874.428336 seconds elapsed, finished iteration 78
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:79, training auc : 0.560425
+[LightGBM] [Info] Iteration:79, training binary_logloss : 4.49977
+[LightGBM] [Info] Iteration:79, valid_1 auc : 0.533169
+[LightGBM] [Info] Iteration:79, valid_1 binary_logloss : 4.64373
+[LightGBM] [Info] 1893.808956 seconds elapsed, finished iteration 79
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:80, training auc : 0.562207
+[LightGBM] [Info] Iteration:80, training binary_logloss : 4.44454
+[LightGBM] [Info] Iteration:80, valid_1 auc : 0.530992
+[LightGBM] [Info] Iteration:80, valid_1 binary_logloss : 4.59419
+[LightGBM] [Info] 1912.756208 seconds elapsed, finished iteration 80
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:81, training auc : 0.556697
+[LightGBM] [Info] Iteration:81, training binary_logloss : 4.46053
+[LightGBM] [Info] Iteration:81, valid_1 auc : 0.524945
+[LightGBM] [Info] Iteration:81, valid_1 binary_logloss : 4.64866
+[LightGBM] [Info] 1930.974204 seconds elapsed, finished iteration 81
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:82, training auc : 0.555461
+[LightGBM] [Info] Iteration:82, training binary_logloss : 4.44944
+[LightGBM] [Info] Iteration:82, valid_1 auc : 0.525397
+[LightGBM] [Info] Iteration:82, valid_1 binary_logloss : 4.62463
+[LightGBM] [Info] 1950.188491 seconds elapsed, finished iteration 82
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:83, training auc : 0.556306
+[LightGBM] [Info] Iteration:83, training binary_logloss : 4.44853
+[LightGBM] [Info] Iteration:83, valid_1 auc : 0.52659
+[LightGBM] [Info] Iteration:83, valid_1 binary_logloss : 4.63163
+[LightGBM] [Info] 1969.760443 seconds elapsed, finished iteration 83
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:84, training auc : 0.554153
+[LightGBM] [Info] Iteration:84, training binary_logloss : 4.48566
+[LightGBM] [Info] Iteration:84, valid_1 auc : 0.523526
+[LightGBM] [Info] Iteration:84, valid_1 binary_logloss : 4.64521
+[LightGBM] [Info] 1988.458513 seconds elapsed, finished iteration 84
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:85, training auc : 0.556231
+[LightGBM] [Info] Iteration:85, training binary_logloss : 4.47365
+[LightGBM] [Info] Iteration:85, valid_1 auc : 0.528751
+[LightGBM] [Info] Iteration:85, valid_1 binary_logloss : 4.60593
+[LightGBM] [Info] 2006.994463 seconds elapsed, finished iteration 85
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:86, training auc : 0.555297
+[LightGBM] [Info] Iteration:86, training binary_logloss : 4.49051
+[LightGBM] [Info] Iteration:86, valid_1 auc : 0.525864
+[LightGBM] [Info] Iteration:86, valid_1 binary_logloss : 4.69293
+[LightGBM] [Info] 2024.931882 seconds elapsed, finished iteration 86
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:87, training auc : 0.555816
+[LightGBM] [Info] Iteration:87, training binary_logloss : 4.46592
+[LightGBM] [Info] Iteration:87, valid_1 auc : 0.527058
+[LightGBM] [Info] Iteration:87, valid_1 binary_logloss : 4.71706
+[LightGBM] [Info] 2041.426431 seconds elapsed, finished iteration 87
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:88, training auc : 0.555247
+[LightGBM] [Info] Iteration:88, training binary_logloss : 4.49792
+[LightGBM] [Info] Iteration:88, valid_1 auc : 0.525639
+[LightGBM] [Info] Iteration:88, valid_1 binary_logloss : 4.73873
+[LightGBM] [Info] 2062.071247 seconds elapsed, finished iteration 88
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:89, training auc : 0.555678
+[LightGBM] [Info] Iteration:89, training binary_logloss : 4.55572
+[LightGBM] [Info] Iteration:89, valid_1 auc : 0.527799
+[LightGBM] [Info] Iteration:89, valid_1 binary_logloss : 4.83242
+[LightGBM] [Info] 2081.064139 seconds elapsed, finished iteration 89
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:90, training auc : 0.553632
+[LightGBM] [Info] Iteration:90, training binary_logloss : 4.5877
+[LightGBM] [Info] Iteration:90, valid_1 auc : 0.527154
+[LightGBM] [Info] Iteration:90, valid_1 binary_logloss : 4.87378
+[LightGBM] [Info] 2101.600853 seconds elapsed, finished iteration 90
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:91, training auc : 0.553862
+[LightGBM] [Info] Iteration:91, training binary_logloss : 4.65349
+[LightGBM] [Info] Iteration:91, valid_1 auc : 0.529089
+[LightGBM] [Info] Iteration:91, valid_1 binary_logloss : 4.90023
+[LightGBM] [Info] 2121.534227 seconds elapsed, finished iteration 91
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:92, training auc : 0.557323
+[LightGBM] [Info] Iteration:92, training binary_logloss : 4.72946
+[LightGBM] [Info] Iteration:92, valid_1 auc : 0.531669
+[LightGBM] [Info] Iteration:92, valid_1 binary_logloss : 4.98962
+[LightGBM] [Info] 2140.595034 seconds elapsed, finished iteration 92
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:93, training auc : 0.555999
+[LightGBM] [Info] Iteration:93, training binary_logloss : 4.73721
+[LightGBM] [Info] Iteration:93, valid_1 auc : 0.52709
+[LightGBM] [Info] Iteration:93, valid_1 binary_logloss : 5.01734
+[LightGBM] [Info] 2158.650503 seconds elapsed, finished iteration 93
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:94, training auc : 0.554618
+[LightGBM] [Info] Iteration:94, training binary_logloss : 4.76731
+[LightGBM] [Info] Iteration:94, valid_1 auc : 0.522913
+[LightGBM] [Info] Iteration:94, valid_1 binary_logloss : 5.09611
+[LightGBM] [Info] 2177.638447 seconds elapsed, finished iteration 94
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:95, training auc : 0.552982
+[LightGBM] [Info] Iteration:95, training binary_logloss : 4.83204
+[LightGBM] [Info] Iteration:95, valid_1 auc : 0.520462
+[LightGBM] [Info] Iteration:95, valid_1 binary_logloss : 5.16685
+[LightGBM] [Info] 2196.163809 seconds elapsed, finished iteration 95
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:96, training auc : 0.555739
+[LightGBM] [Info] Iteration:96, training binary_logloss : 4.80069
+[LightGBM] [Info] Iteration:96, valid_1 auc : 0.525364
+[LightGBM] [Info] Iteration:96, valid_1 binary_logloss : 5.14457
+[LightGBM] [Info] 2215.209040 seconds elapsed, finished iteration 96
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:97, training auc : 0.556455
+[LightGBM] [Info] Iteration:97, training binary_logloss : 4.84836
+[LightGBM] [Info] Iteration:97, valid_1 auc : 0.527428
+[LightGBM] [Info] Iteration:97, valid_1 binary_logloss : 5.19383
+[LightGBM] [Info] 2233.783191 seconds elapsed, finished iteration 97
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:98, training auc : 0.556841
+[LightGBM] [Info] Iteration:98, training binary_logloss : 4.84009
+[LightGBM] [Info] Iteration:98, valid_1 auc : 0.529557
+[LightGBM] [Info] Iteration:98, valid_1 binary_logloss : 5.17724
+[LightGBM] [Info] 2251.823274 seconds elapsed, finished iteration 98
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:99, training auc : 0.555313
+[LightGBM] [Info] Iteration:99, training binary_logloss : 4.87962
+[LightGBM] [Info] Iteration:99, valid_1 auc : 0.526058
+[LightGBM] [Info] Iteration:99, valid_1 binary_logloss : 5.18109
+[LightGBM] [Info] 2270.130411 seconds elapsed, finished iteration 99
+[LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+[LightGBM] [Info] Iteration:100, training auc : 0.553477
+[LightGBM] [Info] Iteration:100, training binary_logloss : 4.94665
+[LightGBM] [Info] Iteration:100, valid_1 auc : 0.527412
+[LightGBM] [Info] Iteration:100, valid_1 binary_logloss : 5.21992
+[LightGBM] [Info] 2289.079607 seconds elapsed, finished iteration 100
+[LightGBM] [Info] Finished training
+RTSingleton is dead
+Segmentation fault
+sh-4.2#

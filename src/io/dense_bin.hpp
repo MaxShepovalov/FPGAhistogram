@@ -103,12 +103,13 @@ public:
     );
 
     //update output
-    for (int i=0; i<hist_size; i++){
-      out[i].sum_hessians = hhess[i];
-      out[i].sum_gradients = hgrad[i];
-      out[i].cnt = hist[i];
-    }
-#else
+    // for (int i=0; i<hist_size; i++){
+    //   out[i].sum_hessians = hhess[i];
+    //   out[i].sum_gradients = hgrad[i];
+    //   out[i].cnt = hist[i];
+    // }
+//#else
+#endif
     const data_size_t rest = num_data & 0x3;
     data_size_t i = 0;
     for (; i < num_data - rest; i += 4) {
@@ -137,6 +138,20 @@ public:
       out[bin].sum_gradients += ordered_gradients[i];
       out[bin].sum_hessians += ordered_hessians[i];
       ++out[bin].cnt;
+    }
+#ifdef USE_FPGA
+    for (int i=0; i<hist_size; i++){
+      bool count_ok = out[i].cnt == hist[i];
+      bool hess_ok = out[i].sum_hessians == hhess[i];
+      bool grad_ok = out[i].sum_gradients == hgrad[i];
+      if (count_ok and hess_ok and grad_ok){
+        continue;
+      } else {
+        printf("Mismatch at bin %d:", i);
+        if (!count_ok){ printf("    count    cpu:%d fpga:%d", out[i].cnt,hist[i]);}
+        if (!hess_ok){ printf("    hessian  cpu:%d fpga:%d", out[i].sum_hessians,hhess[i]);}
+        if (!grad_ok){ printf("    gradient cpu:%d fpga:%d", out[i].sum_gradients,hgrad[i]);}
+      }
     }
 #endif
   }
@@ -174,12 +189,13 @@ public:
     );
 
     //update output
-    for (int i=0; i<hist_size; i++){
-      out[i].sum_hessians = hhess[i];
-      out[i].sum_gradients = hgrad[i];
-      out[i].cnt = hist[i];
-    }
-#else
+//     for (int i=0; i<hist_size; i++){
+//       out[i].sum_hessians = hhess[i];
+//       out[i].sum_gradients = hgrad[i];
+//       out[i].cnt = hist[i];
+//     }
+// #else
+#endif
     const data_size_t rest = num_data & 0x3;
     data_size_t i = 0;
     for (; i < num_data - rest; i += 4) {
@@ -208,6 +224,21 @@ public:
       out[bin].sum_gradients += ordered_gradients[i];
       out[bin].sum_hessians += ordered_hessians[i];
       ++out[bin].cnt;
+    }
+//#endif
+#ifdef USE_FPGA
+    for (int i=0; i<hist_size; i++){
+      bool count_ok = out[i].cnt == hist[i]; 
+      bool hess_ok = out[i].sum_hessians == hhess[i];
+      bool grad_ok = out[i].sum_gradients == hgrad[i];
+      if (count_ok and hess_ok and grad_ok){
+        continue;
+      } else {
+        printf("Mismatch at bin %d:", i);
+        if (!count_ok){ printf("    count    cpu:%d fpga:%d", out[i].cnt,hist[i]);}
+        if (!hess_ok){ printf("    hessian  cpu:%d fpga:%d", out[i].sum_hessians,hhess[i]);}
+        if (!grad_ok){ printf("    gradient cpu:%d fpga:%d", out[i].sum_gradients,hgrad[i]);}
+      }
     }
 #endif
   }
@@ -244,11 +275,12 @@ public:
     );
 
     //update output
-    for (int i=0; i<hist_size; i++){
-      out[i].sum_gradients = hgrad[i];
-      out[i].cnt = hist[i];
-    }
-#else
+//     for (int i=0; i<hist_size; i++){
+//       out[i].sum_gradients = hgrad[i];
+//       out[i].cnt = hist[i];
+//     }
+// #else
+#endif
     const data_size_t rest = num_data & 0x3;
     data_size_t i = 0;
     for (; i < num_data - rest; i += 4) {
@@ -271,6 +303,19 @@ public:
       const VAL_T bin = data_[data_indices[i]];
       out[bin].sum_gradients += ordered_gradients[i];
       ++out[bin].cnt;
+    }
+//#endif
+#ifdef USE_FPGA
+    for (int i=0; i<hist_size; i++){
+      bool count_ok = out[i].cnt == hist[i];
+      bool grad_ok = out[i].sum_gradients == hgrad[i];
+      if (count_ok and hess_ok and grad_ok){
+        continue;
+      } else {
+        printf("Mismatch at bin %d:", i);
+        if (!count_ok){ printf("    count    cpu:%d fpga:%d", out[i].cnt,hist[i]);}
+        if (!grad_ok){ printf("    gradient cpu:%d fpga:%d", out[i].sum_gradients,hgrad[i]);}
+      }
     }
 #endif
   }
