@@ -149,8 +149,8 @@ public:
       } else {
         printf("Mismatch at bin %d:\n", i);
         if (!count_ok){ printf("    count    cpu:%d fpga:%d\n", out[i].cnt,hist[i]);}
-        if (!hess_ok){ printf("    hessian  cpu:%d fpga:%d\n", out[i].sum_hessians,hhess[i]);}
-        if (!grad_ok){ printf("    gradient cpu:%d fpga:%d\n", out[i].sum_gradients,hgrad[i]);}
+        if (!hess_ok){ printf("    hessian  cpu:%f fpga:%f\n", out[i].sum_hessians,hhess[i]);}
+        if (!grad_ok){ printf("    gradient cpu:%f fpga:%f\n", out[i].sum_gradients,hgrad[i]);}
       }
     }
 #endif
@@ -236,8 +236,8 @@ public:
       } else {
         printf("Mismatch at bin %d:\n", i);
         if (!count_ok){ printf("    count    cpu:%d fpga:%d\n", out[i].cnt,hist[i]);}
-        if (!hess_ok){ printf("    hessian  cpu:%d fpga:%d\n", out[i].sum_hessians,hhess[i]);}
-        if (!grad_ok){ printf("    gradient cpu:%d fpga:%d\n", out[i].sum_gradients,hgrad[i]);}
+        if (!hess_ok){ printf("    hessian  cpu:%f fpga:%f\n", out[i].sum_hessians,hhess[i]);}
+        if (!grad_ok){ printf("    gradient cpu:%f fpga:%f\n", out[i].sum_gradients,hgrad[i]);}
       }
     }
 #endif
@@ -314,7 +314,7 @@ public:
       } else {
         printf("Mismatch at bin %d:\n", i);
         if (!count_ok){ printf("    count    cpu:%d fpga:%d\n", out[i].cnt,hist[i]);}
-        if (!grad_ok){ printf("    gradient cpu:%d fpga:%d\n", out[i].sum_gradients,hgrad[i]);}
+        if (!grad_ok){ printf("    gradient cpu:%f fpga:%f\n", out[i].sum_gradients,hgrad[i]);}
       }
     }
 #endif
