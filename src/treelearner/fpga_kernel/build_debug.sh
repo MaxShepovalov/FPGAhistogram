@@ -1,0 +1,7 @@
+/opt/Xilinx/SDx/2017.4.op/bin/xcpp -Wall -O0 -g -std=c++14 -I./src/ -I/opt/Xilinx/SDx/2017.4.op/runtime/include/1_2 -I../../../libs/xcl2  -std=c++0x ./src/host.cpp  ../../../libs/xcl2/xcl2.cpp -o fpga_test -L/opt/Xilinx/SDx/2017.4.op/runtime/lib/x86_64 -L/opt/Xilinx/SDx/2017.4.op/lib/lnx64.o -lOpenCL -pthread
+mkdir -p xclbin
+/opt/Xilinx/SDx/2017.4.op/bin/xocc -g -c --xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true" -s   -o xclbin/fpga64.sw_emu.xilinx_aws-vu9p-f1-04261818_dynamic_5_0.xo -t sw_emu --platform /home/centos/src/project_data/aws-fpga/SDAccel/aws_platform/xilinx_aws-vu9p-f1-04261818_dynamic_5_0/xilinx_aws-vu9p-f1-04261818_dynamic_5_0.xpfm ./src/fpga64.cl
+mkdir -p xclbin
+/opt/Xilinx/SDx/2017.4.op/bin/xocc -g -l --xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true" -s   -o xclbin/fpga64.sw_emu.xilinx_aws-vu9p-f1-04261818_dynamic_5_0.xclbin -t sw_emu --platform /home/centos/src/project_data/aws-fpga/SDAccel/aws_platform/xilinx_aws-vu9p-f1-04261818_dynamic_5_0/xilinx_aws-vu9p-f1-04261818_dynamic_5_0.xpfm xclbin/fpga64.sw_emu.xilinx_aws-vu9p-f1-04261818_dynamic_5_0.xo
+/opt/Xilinx/SDx/2017.4.op/bin/emconfigutil --platform /home/centos/src/project_data/aws-fpga/SDAccel/aws_platform/xilinx_aws-vu9p-f1-04261818_dynamic_5_0/xilinx_aws-vu9p-f1-04261818_dynamic_5_0.xpfm --nd 1
+XCL_EMULATION_MODE=sw_emu ./fpga_test

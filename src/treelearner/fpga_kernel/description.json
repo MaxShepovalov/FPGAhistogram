@@ -1,0 +1,38 @@
+{
+    "runtime": ["OpenCL"],
+    "example": "Fpga code for LightGBM",
+    "overview": [
+        ""
+    ],
+    "key_concepts": [ "OpenCL API", "Synchronize Host and FPGA", "Asynchronous Processing", "Events", "Asynchronous memcpy"],
+    "keywords": [ "cl_event" , "clCreateCommandQueue", "CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE", "clEnqueueMigrateMemObjects"],
+    "os": [
+        "Linux"
+    ],
+    "em_cmd": "./overlap",
+    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./overlap",
+    "libs": [
+        "oclHelper", 
+        "xcl"
+    ], 
+    "accelerators": [
+        {
+            "container": "fpga64", 
+            "name": "kernel_fpgahistogram", 
+            "location": "fpga64.cl"
+        }
+    ],
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ],
+    "revision" : [
+        {
+            "date" : "DEC2016",
+            "version": "1.0",
+            "description": "Initial Xilinx Release"
+        }
+    ]
+}
