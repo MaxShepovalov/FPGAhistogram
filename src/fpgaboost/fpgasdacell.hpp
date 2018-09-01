@@ -830,13 +830,13 @@ int fpgacall(
     krnl_hist_add.setArg(narg++, buffer_shess);//output sum hessians
     
     // __local        int*  Lhist,  //NUM_BINS*loc_size          10
-    krnl_hist_add.setArg(narg++, cl::LocalSpaceArg(64*16*sizeof(int)));
+    krnl_hist_add.setArg(narg++, cl::Local(64*16*sizeof(int)));
     // __local        float* Lgrad, //NUM_BINS*loc_size          11
-    krnl_hist_add.setArg(narg++, cl::LocalSpaceArg(64*16*sizeof(float)));
+    krnl_hist_add.setArg(narg++, cl::Local(64*16*sizeof(float)));
     // __local        float* Lhess, //NUM_BINS*loc_size          12
-    krnl_hist_add.setArg(narg++, cl::LocalSpaceArg(64*16*sizeof(float)));
+    krnl_hist_add.setArg(narg++, cl::Local(64*16*sizeof(float)));
     // __local        int*  Lidx    //numdata                    13
-    krnl_hist_add.setArg(narg++, cl::LocalSpaceArg(work_size*sizeof(int)));
+    krnl_hist_add.setArg(narg++, cl::Local(work_size*sizeof(int)));
     
     //krnl_hist_add.setArg(narg++, items_per_call);//amount of data per one instance of a kernel
     //krnl_hist_add.setArg(narg++, mode);//sets what to use
