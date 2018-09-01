@@ -195,7 +195,8 @@ void init_xilinx(cl::Context & context, cl::CommandQueue & q, cl::Program & prog
     // xocc compiler load into OpenCL Binary and return as Binaries
     // OpenCL and it can contain many functions which can be executed on the
     // device.
-    std::string binaryFile = xcl::find_binary_file(device_name,"histogram");
+    //std::string binaryFile = xcl::find_binary_file(device_name,"histogram");
+    std::string binaryFile = xcl::find_binary_file(device_name,"fpga64");
     cl::Program::Binaries binary_file = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     program = cl::Program(context, devices, binary_file);
@@ -797,27 +798,72 @@ int fpgacall(
 #endif
 
     // extract a kernel
-    cl::Kernel krnl_hist_add(program, "hist_lightgbm");
+    //cl::Kernel krnl_hist_add(program, "hist_lightgbm");
+        cl::Kernel krnl_hist_add(program, "kernel_fpgahistogram");
 
     //set the kernel Arguments
     int narg=0;
     int items_per_call = 1;
+    int use_index = mode & DATAINDICES ? 1 : 0;
+    int use_hess = mode & HESSIANS ? 1 : 0;
     //int number_of_kernels = work_size / 64;
-    krnl_hist_add.setArg(narg++, items_per_call);//amount of data per one instance of a kernel
-    krnl_hist_add.setArg(narg++, work_size);//total size of work
+    //          const int num_data, //amount of work              0
+    krnl_hist_add.setArg(narg++, work_size);
+    //          const int use_index,//flag for index calculation  1
+    krnl_hist_add.setArg(narg++, use_index);
+    //          const int use_hess, //flag for hessian            2
+    krnl_hist_add.setArg(narg++, use_hess);
+    // __global const int* data,    //data pointer                3
     krnl_hist_add.setArg(narg++, buffer_bins);//input bin indices
+    // __global const int* index,   //index pointer (might be 0)  4
     krnl_hist_add.setArg(narg++, buffer_inds);//input data indices
+    // __global const float* grad,  //gradient input pointer      5
     krnl_hist_add.setArg(narg++, buffer_grad);//input gradients
+    // __global const float* hess,  //hessian input pointer       6
     krnl_hist_add.setArg(narg++, buffer_hess);//input hessians
-    krnl_hist_add.setArg(narg++, buffer_sgrad);//output sum gradients
-    krnl_hist_add.setArg(narg++, buffer_shess);//output sum hessians
+    
+    // __global       int* count,   //counter output              7
     krnl_hist_add.setArg(narg++, buffer_hist);//output histogram (should not be NULL)
-    krnl_hist_add.setArg(narg++, mode);//sets what to use
+    // __global       float* hgrad, //gradient output             8
+    krnl_hist_add.setArg(narg++, buffer_sgrad);//output sum gradients
+    // __global       float* hhess, //hessian output              9
+    krnl_hist_add.setArg(narg++, buffer_shess);//output sum hessians
+    
+    // __local        int*  Lhist,  //NUM_BINS*loc_size          10
+    krnl_hist_add.setArg(narg++, cl::local(64*16*sizeof(int)));
+    // __local        float* Lgrad, //NUM_BINS*loc_size          11
+    krnl_hist_add.setArg(narg++, cl::local(64*16*sizeof(float)));
+    // __local        float* Lhess, //NUM_BINS*loc_size          12
+    krnl_hist_add.setArg(narg++, cl::local(64*16*sizeof(float)));
+    // __local        int*  Lidx    //numdata                    13
+    krnl_hist_add.setArg(narg++, cl::local(work_size*sizeof(int)));
+    
+    //krnl_hist_add.setArg(narg++, items_per_call);//amount of data per one instance of a kernel
+    //krnl_hist_add.setArg(narg++, mode);//sets what to use
+
+    // xcl_set_kernel_arg(kernel, 0, sizeof(int), &amount_of_work);
+    // xcl_set_kernel_arg(kernel, 1, sizeof(int), &use);
+    // xcl_set_kernel_arg(kernel, 2, sizeof(int), &use);
+    // xcl_set_kernel_arg(kernel, 3, sizeof(cl_mem), &buffer_data[iteration_idx % 2]);
+    // xcl_set_kernel_arg(kernel, 4, sizeof(cl_mem), &buffer_idx[iteration_idx % 2]);
+    // xcl_set_kernel_arg(kernel, 5, sizeof(cl_mem), &buffer_grad[iteration_idx % 2]);
+    // xcl_set_kernel_arg(kernel, 6, sizeof(cl_mem), &buffer_hess[iteration_idx % 2]);
+    // xcl_set_kernel_arg(kernel, 7, sizeof(cl_mem), &buffer_res_cnt[iteration_idx % 2]);
+    // xcl_set_kernel_arg(kernel, 8, sizeof(cl_mem), &buffer_res_grad[iteration_idx % 2]);
+    // xcl_set_kernel_arg(kernel, 9, sizeof(cl_mem), &buffer_res_hess[iteration_idx % 2]);
+
+    // xcl_set_kernel_arg(kernel, 10, 64*16*sizeof(int), NULL);
+    // xcl_set_kernel_arg(kernel, 11, 64*16*sizeof(float), NULL);
+    // xcl_set_kernel_arg(kernel, 12, 64*16*sizeof(float), NULL);
+    // xcl_set_kernel_arg(kernel, 13, amount_of_work*sizeof(int), NULL);
+
+
+
 //#ifdef FPGADEBUG
 //    krnl_hist_add.setArg(narg++, 1);//do debug print
 //    printf("kernel print should work\n");
 //#else
-    krnl_hist_add.setArg(narg++, 0);//skip debug print
+    //krnl_hist_add.setArg(narg++, 0);//skip debug print
 //#endif
 
 #ifdef FPGADEBUG
@@ -826,13 +872,20 @@ int fpgacall(
 
     //Launch the Kernel
     cl::Event kernel_event;
+    // cl_int krnl_err = q.enqueueNDRangeKernel(
+    //     krnl_hist_add, //kernel
+    //     {1},         //work_dim (offset)
+    //     {work_size}, //work_size (global)
+    //     {1},         //work_size (local)
+    //     NULL,
+    //     &kernel_event);
     cl_int krnl_err = q.enqueueNDRangeKernel(
         krnl_hist_add, //kernel
-        {1},         //work_dim (offset)
-        {work_size}, //work_size (global)
-        {1},         //work_size (local)
-        NULL,
-        &kernel_event);
+        NullRange,         //work_dim (offset)
+        NDRange(work_size), //work_size (global)
+        NDRange(1),         //work_size (local)
+        NULL,               //events vector
+        &kernel_event);     //one event
     q.finish();
 
 #ifdef FPGADEBUG
