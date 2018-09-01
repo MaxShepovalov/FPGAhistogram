@@ -103,7 +103,8 @@ if(USE_HDFS)
 endif(USE_HDFS)
 
 if(UNIX OR MINGW OR CYGWIN)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread -O3 -Wextra -Wall -Wno-ignored-attributes -Wno-unknown-pragmas -Wno-return-type")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -pthread -Wextra -Wall -Wno-ignored-attributes -Wno-unknown-pragmas -Wno-return-type")
+    #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread -O3 -Wextra -Wall -Wno-ignored-attributes -Wno-unknown-pragmas -Wno-return-type")
 endif()
 
 if(WIN32 AND MINGW)
@@ -160,13 +161,14 @@ file(GLOB SOURCES
     src/objective/*.cpp
     src/network/*.cpp
     src/treelearner/*.cpp
-    src/fpgaboost/libs/xcl2/xcl2.cpp
+    src/fpgaboost/libs/xcl/xcl.cpp
 )
 
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-narrowing -Wunused-parameter -L/opt/Xilinx/SDx/2017.1.op/runtime/lib/x86_64 -L/opt/Xilinx/SDx/2017.1.op/lib/lnx64.o -l OpenCL")
+  #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-narrowing -Wunused-parameter -L/opt/Xilinx/SDx/2017.1.op/runtime/lib/x86_64 -L/opt/Xilinx/SDx/2017.1.op/lib/lnx64.o -l OpenCL")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-narrowing -Wunused-parameter -std=c++0x ./src/host.cpp src/fpgaboost/libs/xcl/xcl.c")
 
-  include_directories(src/fpgaboost/libs/xcl2)
-  include_directories(/opt/Xilinx/SDx/2017.1.op/runtime/include/1_2)
+  include_directories(src/fpgaboost/libs/xcl)
+  include_directories(/opt/Xilinx/SDx/2017.4.op/runtime/include/1_2)
 
   ADD_DEFINITIONS(-DUSE_FPGA)
 
@@ -176,6 +178,8 @@ file(GLOB SOURCES
   endif(FPGA_DEBUG)    
 
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0")
+
+  #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
 
 else(USE_FPGA)
 
@@ -222,8 +226,8 @@ if(USE_GPU)
 endif(USE_GPU)
 
 if(USE_FPGA)
-  link_directories(/opt/Xilinx/SDx/2017.1.op/runtime/lib/x86_64)
-  link_directories(/opt/Xilinx/SDx/2017.1.op/lib/lnx64.o)
+  link_directories(/opt/Xilinx/SDx/2017.4.op/runtime/lib/x86_64)
+  link_directories(/opt/Xilinx/SDx/2017.4.op/lib/lnx64.o)
 
   target_link_libraries(lightgbm OpenCL)
 endif(USE_FPGA)
