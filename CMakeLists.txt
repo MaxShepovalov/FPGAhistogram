@@ -161,11 +161,11 @@ file(GLOB SOURCES
     src/objective/*.cpp
     src/network/*.cpp
     src/treelearner/*.cpp
-    src/fpgaboost/libs/xcl/xcl.cpp
+    src/fpgaboost/libs/xcl/xcl.c
 )
 
   #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-narrowing -Wunused-parameter -L/opt/Xilinx/SDx/2017.1.op/runtime/lib/x86_64 -L/opt/Xilinx/SDx/2017.1.op/lib/lnx64.o -l OpenCL")
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-narrowing -Wunused-parameter -std=c++0x ./src/host.cpp src/fpgaboost/libs/xcl/xcl.c")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-narrowing -Wunused-parameter -L/opt/Xilinx/SDx/2017.4.op/runtime/lib/x86_64 -L/opt/Xilinx/SDx/2017.4.op/lib/lnx64.o -l OpenCL")
 
   include_directories(src/fpgaboost/libs/xcl)
   include_directories(/opt/Xilinx/SDx/2017.4.op/runtime/include/1_2)
