@@ -830,13 +830,13 @@ int fpgacall(
     krnl_hist_add.setArg(narg++, buffer_shess);//output sum hessians
     
     // __local        int*  Lhist,  //NUM_BINS*loc_size          10
-    krnl_hist_add.setArg(narg++, cl::local(64*16*sizeof(int)));
+    krnl_hist_add.setArg(narg++, cl::LocalSpaceArg(64*16*sizeof(int)));
     // __local        float* Lgrad, //NUM_BINS*loc_size          11
-    krnl_hist_add.setArg(narg++, cl::local(64*16*sizeof(float)));
+    krnl_hist_add.setArg(narg++, cl::LocalSpaceArg(64*16*sizeof(float)));
     // __local        float* Lhess, //NUM_BINS*loc_size          12
-    krnl_hist_add.setArg(narg++, cl::local(64*16*sizeof(float)));
+    krnl_hist_add.setArg(narg++, cl::LocalSpaceArg(64*16*sizeof(float)));
     // __local        int*  Lidx    //numdata                    13
-    krnl_hist_add.setArg(narg++, cl::local(work_size*sizeof(int)));
+    krnl_hist_add.setArg(narg++, cl::LocalSpaceArg(work_size*sizeof(int)));
     
     //krnl_hist_add.setArg(narg++, items_per_call);//amount of data per one instance of a kernel
     //krnl_hist_add.setArg(narg++, mode);//sets what to use
@@ -881,9 +881,9 @@ int fpgacall(
     //     &kernel_event);
     cl_int krnl_err = q.enqueueNDRangeKernel(
         krnl_hist_add, //kernel
-        NullRange,         //work_dim (offset)
-        NDRange(work_size), //work_size (global)
-        NDRange(1),         //work_size (local)
+        cl::NDRange(),         //work_dim (offset)
+        cl::NDRange(work_size), //work_size (global)
+        cl::NDRange(1),         //work_size (local)
         NULL,               //events vector
         &kernel_event);     //one event
     q.finish();
