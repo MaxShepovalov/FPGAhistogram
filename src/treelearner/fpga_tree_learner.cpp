@@ -744,92 +744,92 @@ void FPGATreeLearner::SetupKernelArguments() {
       // histogram_kernels_[i].set_args(*device_features_, device_feature_masks_, num_data_,
       //                                    *device_data_indices_, num_data_, device_gradients_, 0.0f,
       //                                    *device_subhistograms_, *sync_counters_, device_histogram_outputs_);
-      histogram_kernels_[i].setАrg(0, *device_features_);
-      histogram_kernels_[i].setАrg(1, device_feature_masks_);
-      histogram_kernels_[i].setАrg(2, num_data);
-      histogram_kernels_[i].setАrg(3, *device_data_indices_);
-      histogram_kernels_[i].setАrg(4, num_data_);
-      histogram_kernels_[i].setАrg(5, device_gradients_);
-      histogram_kernels_[i].setАrg(6, 0.0f);
-      histogram_kernels_[i].setАrg(7, *device_subhistograms_);
-      histogram_kernels_[i].setАrg(8, *sync_counters_);
-      histogram_kernels_[i].setАrg(9, device_histogram_outputs_);
+      histogram_kernels_[i].setArg(0, *device_features_);
+      histogram_kernels_[i].setArg(1, device_feature_masks_);
+      histogram_kernels_[i].setArg(2, num_data);
+      histogram_kernels_[i].setArg(3, *device_data_indices_);
+      histogram_kernels_[i].setArg(4, num_data_);
+      histogram_kernels_[i].setArg(5, device_gradients_);
+      histogram_kernels_[i].setArg(6, 0.0f);
+      histogram_kernels_[i].setArg(7, *device_subhistograms_);
+      histogram_kernels_[i].setArg(8, *sync_counters_);
+      histogram_kernels_[i].setArg(9, device_histogram_outputs_);
 
       // histogram_allfeats_kernels_[i].set_args(*device_features_, device_feature_masks_, num_data_,
       //                                    *device_data_indices_, num_data_, device_gradients_, 0.0f,
       //                                    *device_subhistograms_, *sync_counters_, device_histogram_outputs_);
 
-      histogram_allfeats_kernels_[i].setАrg(0, *device_features_);
-      histogram_allfeats_kernels_[i].setАrg(1, device_feature_masks_);
-      histogram_allfeats_kernels_[i].setАrg(2, num_data_);
-      histogram_allfeats_kernels_[i].setАrg(3, *device_data_indices_);
-      histogram_allfeats_kernels_[i].setАrg(4, num_data_);
-      histogram_allfeats_kernels_[i].setАrg(5, device_gradients_);
-      histogram_allfeats_kernels_[i].setАrg(6, 0.0f);
-      histogram_allfeats_kernels_[i].setАrg(7, *device_subhistograms_);
-      histogram_allfeats_kernels_[i].setАrg(8, *sync_counters_);
-      histogram_allfeats_kernels_[i].setАrg(9, device_histogram_outputs_);
+      histogram_allfeats_kernels_[i].setArg(0, *device_features_);
+      histogram_allfeats_kernels_[i].setArg(1, device_feature_masks_);
+      histogram_allfeats_kernels_[i].setArg(2, num_data_);
+      histogram_allfeats_kernels_[i].setArg(3, *device_data_indices_);
+      histogram_allfeats_kernels_[i].setArg(4, num_data_);
+      histogram_allfeats_kernels_[i].setArg(5, device_gradients_);
+      histogram_allfeats_kernels_[i].setArg(6, 0.0f);
+      histogram_allfeats_kernels_[i].setArg(7, *device_subhistograms_);
+      histogram_allfeats_kernels_[i].setArg(8, *sync_counters_);
+      histogram_allfeats_kernels_[i].setArg(9, device_histogram_outputs_);
 
       // histogram_fulldata_kernels_[i].set_args(*device_features_, device_feature_masks_, num_data_,
       //                                     *device_data_indices_, num_data_, device_gradients_, 0.0f,
       //                                     *device_subhistograms_, *sync_counters_, device_histogram_outputs_);
 
-      histogram_fulldata_kernels_[i].setАrg(0, *device_features_);
-      histogram_fulldata_kernels_[i].setАrg(1, device_feature_masks_);
-      histogram_fulldata_kernels_[i].setАrg(2, num_data_);
-      histogram_fulldata_kernels_[i].setАrg(3, *device_data_indices_);
-      histogram_fulldata_kernels_[i].setАrg(4, num_data_);
-      histogram_fulldata_kernels_[i].setАrg(5, device_gradients_);
-      histogram_fulldata_kernels_[i].setАrg(6, 0.0f);
-      histogram_fulldata_kernels_[i].setАrg(7, *device_subhistograms_);
-      histogram_fulldata_kernels_[i].setАrg(8, *sync_counters_);
-      histogram_fulldata_kernels_[i].setАrg(9, device_histogram_outputs_);
+      histogram_fulldata_kernels_[i].setArg(0, *device_features_);
+      histogram_fulldata_kernels_[i].setArg(1, device_feature_masks_);
+      histogram_fulldata_kernels_[i].setArg(2, num_data_);
+      histogram_fulldata_kernels_[i].setArg(3, *device_data_indices_);
+      histogram_fulldata_kernels_[i].setArg(4, num_data_);
+      histogram_fulldata_kernels_[i].setArg(5, device_gradients_);
+      histogram_fulldata_kernels_[i].setArg(6, 0.0f);
+      histogram_fulldata_kernels_[i].setArg(7, *device_subhistograms_);
+      histogram_fulldata_kernels_[i].setArg(8, *sync_counters_);
+      histogram_fulldata_kernels_[i].setArg(9, device_histogram_outputs_);
     }
     else {
       // histogram_kernels_[i].set_args(*device_features_, device_feature_masks_, num_data_,
       //                                    *device_data_indices_, num_data_, device_gradients_, device_hessians_,
       //                                    *device_subhistograms_, *sync_counters_, device_histogram_outputs_);
 
-      histogram_kernels_[i].setАrg(0, *device_features_);
-      histogram_kernels_[i].setАrg(1, device_feature_masks_);
-      histogram_kernels_[i].setАrg(2, num_data_);
-      histogram_kernels_[i].setАrg(3, *device_data_indices_);
-      histogram_kernels_[i].setАrg(4, num_data_);
-      histogram_kernels_[i].setАrg(5, device_gradients_);
-      histogram_kernels_[i].setАrg(6, device_hessians_);
-      histogram_kernels_[i].setАrg(7, *device_subhistograms_);
-      histogram_kernels_[i].setАrg(8, *sync_counters_);
-      histogram_kernels_[i].setАrg(9, device_histogram_outputs_);
+      histogram_kernels_[i].setArg(0, *device_features_);
+      histogram_kernels_[i].setArg(1, device_feature_masks_);
+      histogram_kernels_[i].setArg(2, num_data_);
+      histogram_kernels_[i].setArg(3, *device_data_indices_);
+      histogram_kernels_[i].setArg(4, num_data_);
+      histogram_kernels_[i].setArg(5, device_gradients_);
+      histogram_kernels_[i].setArg(6, device_hessians_);
+      histogram_kernels_[i].setArg(7, *device_subhistograms_);
+      histogram_kernels_[i].setArg(8, *sync_counters_);
+      histogram_kernels_[i].setArg(9, device_histogram_outputs_);
 
       // histogram_allfeats_kernels_[i].set_args(*device_features_, device_feature_masks_, num_data_,
       //                                    *device_data_indices_, num_data_, device_gradients_, device_hessians_,
       //                                    *device_subhistograms_, *sync_counters_, device_histogram_outputs_);
 
-      histogram_allfeats_kernels_[i].setАrg(0, *device_features_);
-      histogram_allfeats_kernels_[i].setАrg(1, device_feature_masks_);
-      histogram_allfeats_kernels_[i].setАrg(2, num_data_);
-      histogram_allfeats_kernels_[i].setАrg(3, *device_data_indices_);
-      histogram_allfeats_kernels_[i].setАrg(4, num_data_);
-      histogram_allfeats_kernels_[i].setАrg(5, device_gradients_);
-      histogram_allfeats_kernels_[i].setАrg(6, device_hessians_);
-      histogram_allfeats_kernels_[i].setАrg(7, *device_subhistograms_);
-      histogram_allfeats_kernels_[i].setАrg(8, *sync_counters_);
-      histogram_allfeats_kernels_[i].setАrg(9, device_histogram_outputs_);
+      histogram_allfeats_kernels_[i].setArg(0, *device_features_);
+      histogram_allfeats_kernels_[i].setArg(1, device_feature_masks_);
+      histogram_allfeats_kernels_[i].setArg(2, num_data_);
+      histogram_allfeats_kernels_[i].setArg(3, *device_data_indices_);
+      histogram_allfeats_kernels_[i].setArg(4, num_data_);
+      histogram_allfeats_kernels_[i].setArg(5, device_gradients_);
+      histogram_allfeats_kernels_[i].setArg(6, device_hessians_);
+      histogram_allfeats_kernels_[i].setArg(7, *device_subhistograms_);
+      histogram_allfeats_kernels_[i].setArg(8, *sync_counters_);
+      histogram_allfeats_kernels_[i].setArg(9, device_histogram_outputs_);
 
       // histogram_fulldata_kernels_[i].set_args(*device_features_, device_feature_masks_, num_data_,
       //                                     *device_data_indices_, num_data_, device_gradients_, device_hessians_,
       //                                     *device_subhistograms_, *sync_counters_, device_histogram_outputs_);
 
-      histogram_fulldata_kernels_[i].setАrg(0, *device_features_);
-      histogram_fulldata_kernels_[i].setАrg(1, device_feature_masks_);
-      histogram_fulldata_kernels_[i].setАrg(2, num_data_);
-      histogram_fulldata_kernels_[i].setАrg(3, *device_data_indices_);
-      histogram_fulldata_kernels_[i].setАrg(4, num_data_);
-      histogram_fulldata_kernels_[i].setАrg(5, device_gradients_);
-      histogram_fulldata_kernels_[i].setАrg(6, device_hessians_);
-      histogram_fulldata_kernels_[i].setАrg(7, *device_subhistograms_);
-      histogram_fulldata_kernels_[i].setАrg(8, *sync_counters_);
-      histogram_fulldata_kernels_[i].setАrg(9, device_histogram_outputs_);
+      histogram_fulldata_kernels_[i].setArg(0, *device_features_);
+      histogram_fulldata_kernels_[i].setArg(1, device_feature_masks_);
+      histogram_fulldata_kernels_[i].setArg(2, num_data_);
+      histogram_fulldata_kernels_[i].setArg(3, *device_data_indices_);
+      histogram_fulldata_kernels_[i].setArg(4, num_data_);
+      histogram_fulldata_kernels_[i].setArg(5, device_gradients_);
+      histogram_fulldata_kernels_[i].setArg(6, device_hessians_);
+      histogram_fulldata_kernels_[i].setArg(7, *device_subhistograms_);
+      histogram_fulldata_kernels_[i].setArg(8, *sync_counters_);
+      histogram_fulldata_kernels_[i].setArg(9, device_histogram_outputs_);
     }
   }
 }
