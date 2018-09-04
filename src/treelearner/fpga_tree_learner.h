@@ -232,29 +232,29 @@ private:
   std::unique_ptr<cl::vector<Feature4>> device_features_;
   /*! \brief FPGA memory object holding the ordered gradient */
   //boost::compute::buffer device_gradients_;
-  cl::buffer device_gradients_;
+  cl::Buffer device_gradients_;
   /*! \brief Pinned memory object for ordered gradient */
   //boost::compute::buffer pinned_gradients_;
-  cl::buffer pinned_gradients_;
+  cl::Buffer pinned_gradients_;
   /*! \brief Pointer to pinned memory of ordered gradient */
   void * ptr_pinned_gradients_ = nullptr;
   /*! \brief FPGA memory object holding the ordered hessian */
   //boost::compute::buffer device_hessians_;
-  cl::buffer device_hessians_;
+  cl::Buffer device_hessians_;
   /*! \brief Pinned memory object for ordered hessian */
   //boost::compute::buffer pinned_hessians_;
-  cl::buffer pinned_hessians_;
+  cl::Buffer pinned_hessians_;
   /*! \brief Pointer to pinned memory of ordered hessian */
   void * ptr_pinned_hessians_ = nullptr;
   /*! \brief A vector of feature mask. 1 = feature used, 0 = feature not used */
   //std::vector<char, boost::alignment::aligned_allocator<char, 4096>> feature_masks_;
-  std::vector<char, cl::aligned_allocator<char, 4096>> feature_masks_;
+  std::vector<char, aligned_allocator<char, 4096>> feature_masks_;
   /*! \brief FPGA memory object holding the feature masks */
   //boost::compute::buffer device_feature_masks_;
-  cl::buffer device_feature_masks_;
+  cl::Buffer device_feature_masks_;
   /*! \brief Pinned memory object for feature masks */
   //boost::compute::buffer pinned_feature_masks_;
-  cl::buffer pinned_feature_masks_;
+  cl::Buffer pinned_feature_masks_;
   /*! \brief Pointer to pinned memory of feature masks */
   void * ptr_pinned_feature_masks_ = nullptr;
   /*! \brief FPGA memory object holding indices of the leaf being processed */
@@ -268,24 +268,26 @@ private:
   std::unique_ptr<cl::vector<char>> device_subhistograms_;
   /*! \brief Host memory object for histogram output (FPGA will write to Host memory directly) */
   //boost::compute::buffer device_histogram_outputs_;
-  cl::buffer device_histogram_outputs_;
+  cl::Buffer device_histogram_outputs_;
   /*! \brief Host memory pointer for histogram outputs */
   void * host_histogram_outputs_;
   /*! \brief OpenCL waitlist object for waiting for data transfer before kernel execution */
   //boost::compute::wait_list kernel_wait_obj_;
-  cl::wait_list kernel_wait_obj_;
+  //std::array<cl::Event> kernel_wait_obj_;
+  cl::Event kernel_wait_obj_;
   /*! \brief OpenCL waitlist object for reading output histograms after kernel execution */
   //boost::compute::wait_list histograms_wait_obj_;
-  cl::wait_list histograms_wait_obj_;
+  //std::array<cl::Event> histograms_wait_obj_;
+  cl::Event histograms_wait_obj_;
   /*! \brief Asynchronous waiting object for copying indices */
   //boost::compute::future<void> indices_future_;
-  cl::event indices_future_;
+  cl::Event indices_future_;
   /*! \brief Asynchronous waiting object for copying gradients */
   //boost::compute::event gradients_future_;
-  cl::event gradients_future_;
+  cl::Event gradients_future_;
   /*! \brief Asynchronous waiting object for copying hessians */
   //boost::compute::event hessians_future_;
-  cl::event hessians_future_;
+  cl::Event hessians_future_;
 };
 
 }  // namespace LightGBM

@@ -23,13 +23,16 @@ FPGATreeLearner::FPGATreeLearner(const Config* config) //
 
 FPGATreeLearner::~FPGATreeLearner() {
   if (ptr_pinned_gradients_) {
-    queue_.enqueue_unmap_buffer(pinned_gradients_, ptr_pinned_gradients_);
+    //queue_.enqueue_unmap_buffer(pinned_gradients_, ptr_pinned_gradients_);
+    queue_.enqueueUnmapMemObject(pinned_gradients_, ptr_pinned_gradients_);
   }
   if (ptr_pinned_hessians_) {
-    queue_.enqueue_unmap_buffer(pinned_hessians_, ptr_pinned_hessians_);
+    //queue_.enqueue_unmap_buffer(pinned_hessians_, ptr_pinned_hessians_);
+    queue_.enqueueUnmapMemObject(pinned_hessians_, ptr_pinned_hessians_);
   }
   if (ptr_pinned_feature_masks_) {
-    queue_.enqueue_unmap_buffer(pinned_feature_masks_, ptr_pinned_feature_masks_);
+    //queue_.enqueue_unmap_buffer(pinned_feature_masks_, ptr_pinned_feature_masks_);
+    queue_.enqueueUnmapMemObject(pinned_feature_masks_, ptr_pinned_feature_masks_);
   }
 }
 
@@ -170,25 +173,43 @@ void FPGATreeLearner::FPGAHistogram(data_size_t leaf_num_data, bool use_all_feat
   // will launch threads for all features
   // the queue should be asynchrounous, and we will can WaitAndGetHistograms() before we start processing dense feature groups
   if (leaf_num_data == num_data_) {
-    kernel_wait_obj_ = boost::compute::wait_list(queue_.enqueue_1d_range_kernel(histogram_fulldata_kernels_[exp_workgroups_per_feature], 0, num_workgroups * 256, 256));
+    //kernel_wait_obj_ = boost::compute::wait_list(queue_.enqueue_1d_range_kernel(histogram_fulldata_kernels_[exp_workgroups_per_feature], 0, num_workgroups * 256, 256));
+    // cl_int krnl_err = q.enqueueNDRangeKernel(
+    //     krnl_hist_add, //kernel
+    //     {1},         //work_dim (offset)
+    //     {work_size}, //work_size (global)
+    //     {1},         //work_size (local)
+    //     NULL,
+    //     &kernel_event);
+    queue_.enqueueNDRangeKernel( histogram_fulldata_kernels_[exp_workgroups_per_feature],
+        0, num_workgroups * 256, 256, NULL, &kernel_wait_obj_);
   }
   else {
     if (use_all_features) {
-      kernel_wait_obj_ = boost::compute::wait_list(
-                         queue_.enqueue_1d_range_kernel(histogram_allfeats_kernels_[exp_workgroups_per_feature], 0, num_workgroups * 256, 256));
+      //kernel_wait_obj_ = boost::compute::wait_list(
+      //                   queue_.enqueue_1d_range_kernel(histogram_allfeats_kernels_[exp_workgroups_per_feature], 0, num_workgroups * 256, 256));
+      queue_.enqueueNDRangeKernel( histogram_allfeats_kernels_[exp_workgroups_per_feature],
+        0, num_workgroups * 256, 256, NULL, &kernel_wait_obj_);
     }
     else {
-      kernel_wait_obj_ = boost::compute::wait_list(
-                         queue_.enqueue_1d_range_kernel(histogram_kernels_[exp_workgroups_per_feature], 0, num_workgroups * 256, 256));
+      //kernel_wait_obj_ = boost::compute::wait_list(
+      //                   queue_.enqueue_1d_range_kernel(histogram_kernels_[exp_workgroups_per_feature], 0, num_workgroups * 256, 256));
+      queue_.enqueueNDRangeKernel(histogram_kernels_[exp_workgroups_per_feature],
+        0, num_workgroups * 256, 256, NULL, &kernel_wait_obj_);
     }
   }
   // copy the results asynchronously. Size depends on if double precision is used
   size_t output_size = num_dense_feature4_ * dword_features_ * device_bin_size_ * hist_bin_entry_sz_;
-  boost::compute::event histogram_wait_event;
-  host_histogram_outputs_ = (void*)queue_.enqueue_map_buffer_async(device_histogram_outputs_, boost::compute::command_queue::map_read, 
-                                                                   0, output_size, histogram_wait_event, kernel_wait_obj_);
+  //boost::compute::event histogram_wait_event;
+  cl::Event histogram_wait_event;
+  //host_histogram_outputs_ = (void*)queue_.enqueue_map_buffer_async(device_histogram_outputs_, boost::compute::command_queue::map_read, 
+  //                                                                 0, output_size, histogram_wait_event, kernel_wait_obj_);
+  //void*                      &buffer,                blocking,   flag,         offset, [size, vector<Event>, *Event, *err])
+  host_histogram_outputs_ = (void*)queue_.enqueueMapBuffer(device_histogram_outputs_, false, CL_MAP_READ, 0, output_size, histogram_wait_event, kernel_wait_obj_);
   // we will wait for this object in WaitAndGetHistograms
-  histograms_wait_obj_ = boost::compute::wait_list(histogram_wait_event);
+  //histograms_wait_obj_ = boost::compute::wait_list(histogram_wait_event);
+  histograms_wait_obj_ = histogram_wait_event;
+
 }
 
 template <typename HistType>
@@ -229,7 +250,8 @@ void FPGATreeLearner::WaitAndGetHistograms(HistogramBinEntry* histograms) {
       }
     }
   }
-  queue_.enqueue_unmap_buffer(device_histogram_outputs_, host_histogram_outputs_);
+  //queue_.enqueue_unmap_buffer(device_histogram_outputs_, host_histogram_outputs_);
+  queue_.enqueueUnmapMemObject(device_histogram_outputs_, host_histogram_outputs_);
 }
 
 void FPGATreeLearner::AllocateFPGAMemory() {
@@ -259,64 +281,69 @@ void FPGATreeLearner::AllocateFPGAMemory() {
   device_features_ = std::unique_ptr<cl::vector<Feature4>>(new cl::vector<Feature4>(num_dense_feature4_ * num_data_, ctx_));
   // unpin old buffer if necessary before destructing them
   if (ptr_pinned_gradients_) {
-    queue_.enqueue_unmap_buffer(pinned_gradients_, ptr_pinned_gradients_);
+    //queue_.enqueue_unmap_buffer(pinned_gradients_, ptr_pinned_gradients_);
+    queue_.enqueueUnmapMemObject(pinned_gradients_, ptr_pinned_gradients_);
   }
   if (ptr_pinned_hessians_) {
-    queue_.enqueue_unmap_buffer(pinned_hessians_, ptr_pinned_hessians_);
+    //queue_.enqueue_unmap_buffer(pinned_hessians_, ptr_pinned_hessians_);
+    queue_.enqueueUnmapMemObject(pinned_hessians_, ptr_pinned_hessians_);
   }
   if (ptr_pinned_feature_masks_) {
-    queue_.enqueue_unmap_buffer(pinned_feature_masks_, ptr_pinned_feature_masks_);
+    //queue_.enqueue_unmap_buffer(pinned_feature_masks_, ptr_pinned_feature_masks_);
+    queue_.enqueueUnmapMemObject(pinned_feature_masks_, ptr_pinned_feature_masks_);
   }
   // make ordered_gradients and hessians larger (including extra room for prefetching), and pin them 
   ordered_gradients_.reserve(allocated_num_data_);
   ordered_hessians_.reserve(allocated_num_data_);
   //pinned_gradients_ = boost::compute::buffer(); // deallocate
-  pinned_gradients_ = cl::buffer(); // deallocate
+  pinned_gradients_ = cl::Buffer(); // deallocate
   //pinned_gradients_ = boost::compute::buffer(ctx_, allocated_num_data_ * sizeof(score_t), 
-  pinned_gradients_ = cl::buffer(ctx_, allocated_num_data_ * sizeof(score_t), 
+  pinned_gradients_ = cl::Buffer(ctx_, allocated_num_data_ * sizeof(score_t), 
                                              //boost::compute::memory_object::read_write | boost::compute::memory_object::use_host_ptr, 
                                              CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR,
                                              ordered_gradients_.data());
-  ptr_pinned_gradients_ = queue_.enqueue_map_buffer(pinned_gradients_, //boost::compute::command_queue::map_write_invalidate_region, 
+  //ptr_pinned_gradients_ = queue_.enqueue_map_buffer(pinned_gradients_, //boost::compute::command_queue::map_write_invalidate_region, 
+  ptr_pinned_gradients_ = queue_.enqueueMapBuffer(pinned_gradients_, //boost::compute::command_queue::map_write_invalidate_region, 
                                                     CL_MAP_WRITE_INVALIDATE_REGION,
                                                     0, allocated_num_data_ * sizeof(score_t));
   //pinned_hessians_ = boost::compute::buffer(); // deallocate
-  pinned_hessians_ = cl::buffer(); // deallocate
+  pinned_hessians_ = cl::Buffer(); // deallocate
   //pinned_hessians_  = boost::compute::buffer(ctx_, allocated_num_data_ * sizeof(score_t), 
-  pinned_hessians_  = cl::buffer(ctx_, allocated_num_data_ * sizeof(score_t), 
+  pinned_hessians_  = cl::Buffer(ctx_, allocated_num_data_ * sizeof(score_t), 
                                              //boost::compute::memory_object::read_write | boost::compute::memory_object::use_host_ptr, 
                                              CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR,
                                              ordered_hessians_.data());
-  ptr_pinned_hessians_ = queue_.enqueue_map_buffer(pinned_hessians_,// boost::compute::command_queue::map_write_invalidate_region, 
+  ptr_pinned_hessians_ = queue_.enqueueMapBuffer(pinned_hessians_,// boost::compute::command_queue::map_write_invalidate_region, 
                                                    CL_MAP_WRITE_INVALIDATE_REGION,
                                                    0, allocated_num_data_ * sizeof(score_t));
   // allocate space for gradients and hessians on device
   // we will copy gradients and hessians in after ordered_gradients_ and ordered_hessians_ are constructed
   //device_gradients_ = boost::compute::buffer(); // deallocate
-  device_gradients_ = cl::buffer(); // deallocate
+  device_gradients_ = cl::Buffer(); // deallocate
   //device_gradients_ = boost::compute::buffer(ctx_, allocated_num_data_ * sizeof(score_t), 
-  device_gradients_ = cl::buffer(ctx_, allocated_num_data_ * sizeof(score_t), 
+  device_gradients_ = cl::Buffer(ctx_, allocated_num_data_ * sizeof(score_t), 
                       //boost::compute::memory_object::read_only, nullptr);
                       CL_MEM_READ_ONLY, nullptr);
   //device_hessians_ = boost::compute::buffer(); // deallocate
-  device_hessians_ = cl::buffer(); // deallocate
+  device_hessians_ = cl::Buffer(); // deallocate
   //device_hessians_  = boost::compute::buffer(ctx_, allocated_num_data_ * sizeof(score_t), 
-  device_hessians_  = cl::buffer(ctx_, allocated_num_data_ * sizeof(score_t), 
+  device_hessians_  = cl::Buffer(ctx_, allocated_num_data_ * sizeof(score_t), 
                       //boost::compute::memory_object::read_only, nullptr);
                       CL_MEM_READ_ONLY, nullptr);
   // allocate feature mask, for disabling some feature-groups' histogram calculation
   feature_masks_.resize(num_dense_feature4_ * dword_features_);
   //device_feature_masks_ = boost::compute::buffer(); // deallocate
-  device_feature_masks_ = cl::buffer(); // deallocate
+  device_feature_masks_ = cl::Buffer(); // deallocate
   //device_feature_masks_ = boost::compute::buffer(ctx_, num_dense_feature4_ * dword_features_, 
-  device_feature_masks_ = cl::buffer(ctx_, num_dense_feature4_ * dword_features_, 
+  device_feature_masks_ = cl::Buffer(ctx_, num_dense_feature4_ * dword_features_, 
                           //boost::compute::memory_object::read_only, nullptr);
                           CL_MEM_READ_ONLY, nullptr);
-  pinned_feature_masks_ = boost::compute::buffer(ctx_, num_dense_feature4_ * dword_features_, 
+  //pinned_feature_masks_ = boost::compute::buffer(ctx_, num_dense_feature4_ * dword_features_, 
+  pinned_feature_masks_ = cl::Buffer(ctx_, num_dense_feature4_ * dword_features_, 
                                              //boost::compute::memory_object::read_write | boost::compute::memory_object::use_host_ptr, 
                                              CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR,
                                              feature_masks_.data());
-  ptr_pinned_feature_masks_ = queue_.enqueue_map_buffer(pinned_feature_masks_, //boost::compute::command_queue::map_write_invalidate_region,
+  ptr_pinned_feature_masks_ = queue_.enqueueMapBuffer(pinned_feature_masks_, //boost::compute::command_queue::map_write_invalidate_region,
                                                         CL_MAP_WRITE_INVALIDATE_REGION,
                                                         0, num_dense_feature4_ * dword_features_);
   memset(ptr_pinned_feature_masks_, 0, num_dense_feature4_ * dword_features_);
@@ -346,9 +373,9 @@ void FPGATreeLearner::AllocateFPGAMemory() {
   cl::fill(sync_counters_->begin(), sync_counters_->end(), 0, queue_);
   // The output buffer is allocated to host directly, to overlap compute and data transfer
   //device_histogram_outputs_ = boost::compute::buffer(); // deallocate
-  device_histogram_outputs_ = cl::buffer(); // deallocate
+  device_histogram_outputs_ = cl::Buffer(); // deallocate
   //device_histogram_outputs_ = boost::compute::buffer(ctx_, num_dense_feature4_ * dword_features_ * device_bin_size_ * hist_bin_entry_sz_, 
-  device_histogram_outputs_ = cl::buffer(ctx_, num_dense_feature4_ * dword_features_ * device_bin_size_ * hist_bin_entry_sz_, 
+  device_histogram_outputs_ = cl::Buffer(ctx_, num_dense_feature4_ * dword_features_ * device_bin_size_ * hist_bin_entry_sz_, 
                            //boost::compute::memory_object::write_only | boost::compute::memory_object::alloc_host_ptr, 
                            CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR;
                            nullptr);
@@ -388,18 +415,18 @@ void FPGATreeLearner::AllocateFPGAMemory() {
   nthreads = std::max(nthreads, 1);
   std::vector<Feature4*> host4_vecs(nthreads);
   //std::vector<boost::compute::buffer> host4_bufs(nthreads);
-  std::vector<cl::buffer> host4_bufs(nthreads);
+  std::vector<cl::Buffer> host4_bufs(nthreads);
   std::vector<Feature4*> host4_ptrs(nthreads);
   // preallocate arrays for all threads, and pin them
   for (int i = 0; i < nthreads; ++i) {
     //host4_vecs[i] = (Feature4*)boost::alignment::aligned_alloc(4096, num_data_ * sizeof(Feature4));
     host4_vecs[i] = (Feature4*)std::aligned_alloc(4096, num_data_ * sizeof(Feature4));
     //host4_bufs[i] = boost::compute::buffer(ctx_, num_data_ * sizeof(Feature4), 
-    host4_bufs[i] = cl::buffer(ctx_, num_data_ * sizeof(Feature4), 
+    host4_bufs[i] = cl::Buffer(ctx_, num_data_ * sizeof(Feature4), 
                     //boost::compute::memory_object::read_write | boost::compute::memory_object::use_host_ptr, 
                     CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, 
                     host4_vecs[i]);
-    host4_ptrs[i] = (Feature4*)queue_.enqueue_map_buffer(host4_bufs[i],
+    host4_ptrs[i] = (Feature4*)queue_.enqueueMapBuffer(host4_bufs[i],
                     //boost::compute::command_queue::map_write_invalidate_region,
                     CL_MAP_WRITE_INVALIDATE_REGION,
                     0, num_data_ * sizeof(Feature4));
@@ -475,7 +502,8 @@ void FPGATreeLearner::AllocateFPGAMemory() {
     else {
       Log::Fatal("Bug in FPGA tree builder: dword_features_ can only be 4 or 8");
     }
-    queue_.enqueue_write_buffer(device_features_->get_buffer(),
+    //queue_.enqueue_write_buffer(device_features_->get_buffer(),
+    queue_.enqueueWriteBuffer(device_features_->get_buffer(),
                         i * num_data_ * sizeof(Feature4), num_data_ * sizeof(Feature4), host4);
     #if FPGA_DEBUG >= 1
     printf("first example of feature-group tuple is: %d %d %d %d\n", host4[0].s0, host4[0].s1, host4[0].s2, host4[0].s3);
@@ -557,7 +585,8 @@ void FPGATreeLearner::AllocateFPGAMemory() {
       }
     }
     // copying the last 1 to (dword_features - 1) feature-groups in the last tuple
-    queue_.enqueue_write_buffer(device_features_->get_buffer(),
+    //queue_.enqueue_write_buffer(device_features_->get_buffer(),
+    queue_.enqueueWriteBuffer(device_features_->get_buffer(),
                         (num_dense_feature4_ - 1) * num_data_ * sizeof(Feature4), num_data_ * sizeof(Feature4), host4);
     #if FPGA_DEBUG >= 1
     printf("Last features copied to device\n");
@@ -568,9 +597,9 @@ void FPGATreeLearner::AllocateFPGAMemory() {
   }
   // deallocate pinned space for feature copying
   for (int i = 0; i < nthreads; ++i) {
-      queue_.enqueue_unmap_buffer(host4_bufs[i], host4_ptrs[i]);
+      queue_.enqueueUnmapMemObject(host4_bufs[i], host4_ptrs[i]);
       //host4_bufs[i] = boost::compute::buffer();
-      host4_bufs[i] = cl::buffer();
+      host4_bufs[i] = cl::Buffer();
       //boost::alignment::aligned_free(host4_vecs[i]);
       std::aligned_free(host4_vecs[i]);
   }
@@ -1285,3 +1314,4 @@ void FPGATreeLearner::Split(Tree* tree, int best_Leaf, int* left_leaf, int* righ
 
 }   // namespace LightGBM
 #endif // USE_FPGA
+
