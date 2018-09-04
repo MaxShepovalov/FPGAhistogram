@@ -134,7 +134,8 @@ void FPGATreeLearner::FPGAHistogram(data_size_t leaf_num_data, bool use_all_feat
   if (num_workgroups > preallocd_max_num_wg_) {
     preallocd_max_num_wg_ = num_workgroups;
     Log::Info("Increasing preallocd_max_num_wg_ to %d for launching more workgroups", preallocd_max_num_wg_);
-    device_subhistograms_.reset(new boost::compute::vector<char>(
+    //device_subhistograms_.reset(new boost::compute::vector<char>(
+    device_subhistograms_.reset(new std::vector<char>(
                               preallocd_max_num_wg_ * dword_features_ * device_bin_size_ * hist_bin_entry_sz_, ctx_));
     // we need to refresh the kernel arguments after reallocating
     for (int i = 0; i <= kMaxLogWorkgroupsPerFeature; ++i) {

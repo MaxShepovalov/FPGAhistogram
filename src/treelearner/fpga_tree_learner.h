@@ -169,7 +169,7 @@ private:
   cl::Device dev_;
   /*! \brief FPGA context object */
   //boost::compute::context ctx_;
-  cl::context ctx_;
+  cl::Context ctx_;
   /*! \brief FPGA command queue object */
   //boost::compute::command_queue queue_;
   cl::CommandQueue queue_;
@@ -193,15 +193,15 @@ private:
   /*! \brief a array of histogram kernels with different number
      of workgroups per feature */
   //std::vector<boost::compute::kernel> histogram_kernels_;
-  std::vector<cl::kernel> histogram_kernels_;
+  std::vector<cl::Kernel> histogram_kernels_;
   /*! \brief a array of histogram kernels with different number
      of workgroups per feature, with all features enabled to avoid branches */
   //std::vector<boost::compute::kernel> histogram_allfeats_kernels_;
-  std::vector<cl::kernel> histogram_allfeats_kernels_;
+  std::vector<cl::Kernel> histogram_allfeats_kernels_;
   /*! \brief a array of histogram kernels with different number
      of workgroups per feature, and processing the whole dataset */
   //std::vector<boost::compute::kernel> histogram_fulldata_kernels_;
-  std::vector<cl::kernel> histogram_fulldata_kernels_;
+  std::vector<cl::Kernel> histogram_fulldata_kernels_;
   /*! \brief total number of feature-groups */
   int num_feature_groups_;
   /*! \brief total number of dense feature-groups, which will be processed on FPGA */
@@ -248,7 +248,8 @@ private:
   void * ptr_pinned_hessians_ = nullptr;
   /*! \brief A vector of feature mask. 1 = feature used, 0 = feature not used */
   //std::vector<char, boost::alignment::aligned_allocator<char, 4096>> feature_masks_;
-  std::vector<char, aligned_allocator<char, 4096>> feature_masks_;
+  //std::vector<char, aligned_allocator<char, 4096>> feature_masks_;
+  std::vector<char, aligned_allocator<char>> feature_masks_;
   /*! \brief FPGA memory object holding the feature masks */
   //boost::compute::buffer device_feature_masks_;
   cl::Buffer device_feature_masks_;
