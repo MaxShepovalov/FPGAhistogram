@@ -11,17 +11,17 @@
 #include <vector>
 
 
-#define GPU_DEBUG 0
+#define FPGA_DEBUG 0
 
 namespace LightGBM {
 
-GPUTreeLearner::GPUTreeLearner(const Config* config)
+FPGATreeLearner::FPGATreeLearner(const Config* config) //
   :SerialTreeLearner(config) {
   use_bagging_ = false;
-  Log::Info("This is the GPU trainer!!");
+  Log::Info("This is the FPGA trainer");
 }
 
-GPUTreeLearner::~GPUTreeLearner() {
+FPGATreeLearner::~FPGATreeLearner() {
   if (ptr_pinned_gradients_) {
     queue_.enqueue_unmap_buffer(pinned_gradients_, ptr_pinned_gradients_);
   }
@@ -33,17 +33,18 @@ GPUTreeLearner::~GPUTreeLearner() {
   }
 }
 
-void GPUTreeLearner::Init(const Dataset* train_data, bool is_constant_hessian) {
+void FPGATreeLearner::Init(const Dataset* train_data, bool is_constant_hessian) { //
   // initialize SerialTreeLearner
   SerialTreeLearner::Init(train_data, is_constant_hessian);
-  // some additional variables needed for GPU trainer
+  // some additional variables needed for FPGA trainer
   num_feature_groups_ = train_data_->num_feature_groups();
-  // Initialize GPU buffers and kernels
-  InitGPU(config_->gpu_platform_id, config_->gpu_device_id);
+  // Initialize FPGA buffers and kernels
+  //InitFPGA(config_->FPGA_platform_id, config_->FPGA_device_id);
+
 }
 
-// some functions used for debugging the GPU histogram construction
-#if GPU_DEBUG > 0
+// some functions used for debugging the FPGA histogram construction
+#if FPGA_DEBUG > 0
 
 void PrintHistograms(HistogramBinEntry* h, size_t size) {
   size_t total = 0;
@@ -100,13 +101,13 @@ err:
 }
 #endif
 
-int GPUTreeLearner::GetNumWorkgroupsPerFeature(data_size_t leaf_num_data) {
+int FPGATreeLearner::GetNumWorkgroupsPerFeature(data_size_t leaf_num_data) {
   // we roughly want 256 workgroups per device, and we have num_dense_feature4_ feature tuples.
   // also guarantee that there are at least 2K examples per workgroup
   double x = 256.0 / num_dense_feature4_;
   int exp_workgroups_per_feature = (int)ceil(log2(x));
   double t = leaf_num_data / 1024.0;
-  #if GPU_DEBUG >= 4
+  #if FPGA_DEBUG >= 4
   printf("Computing histogram for %d examples and (%d * %d) feature groups\n", leaf_num_data, dword_features_, num_dense_feature4_);
   printf("We can have at most %d workgroups per feature4 for efficiency reasons.\n"
          "Best workgroup size per feature for full utilization is %d\n", (int)ceil(t), (1 << exp_workgroups_per_feature));
@@ -120,8 +121,8 @@ int GPUTreeLearner::GetNumWorkgroupsPerFeature(data_size_t leaf_num_data) {
   return exp_workgroups_per_feature;
 }
 
-void GPUTreeLearner::GPUHistogram(data_size_t leaf_num_data, bool use_all_features) {
-  // we have already copied ordered gradients, ordered hessians and indices to GPU
+void FPGATreeLearner::FPGAHistogram(data_size_t leaf_num_data, bool use_all_features) {
+  // we have already copied ordered gradients, ordered hessians and indices to FPGA
   // decide the best number of workgroups working on one feature4 tuple
   // set work group size based on feature size
   // each 2^exp_workgroups_per_feature workgroups work on a feature4 tuple
@@ -140,12 +141,12 @@ void GPUTreeLearner::GPUHistogram(data_size_t leaf_num_data, bool use_all_featur
       histogram_fulldata_kernels_[i].set_arg(7, *device_subhistograms_);
     }
   }
-  #if GPU_DEBUG >= 4
+  #if FPGA_DEBUG >= 4
   printf("Setting exp_workgroups_per_feature to %d, using %u work groups\n", exp_workgroups_per_feature, num_workgroups);
   printf("Constructing histogram with %d examples\n", leaf_num_data);
   #endif
   
-  // the GPU kernel will process all features in one call, and each
+  // the FPGA kernel will process all features in one call, and each
   // 2^exp_workgroups_per_feature (compile time constant) workgroup will
   // process one feature4 tuple
 
@@ -191,7 +192,7 @@ void GPUTreeLearner::GPUHistogram(data_size_t leaf_num_data, bool use_all_featur
 }
 
 template <typename HistType>
-void GPUTreeLearner::WaitAndGetHistograms(HistogramBinEntry* histograms) {
+void FPGATreeLearner::WaitAndGetHistograms(HistogramBinEntry* histograms) {
   HistType* hist_outputs = (HistType*) host_histogram_outputs_;
   // when the output is ready, the computation is done
   histograms_wait_obj_.wait();
@@ -231,7 +232,7 @@ void GPUTreeLearner::WaitAndGetHistograms(HistogramBinEntry* histograms) {
   queue_.enqueue_unmap_buffer(device_histogram_outputs_, host_histogram_outputs_);
 }
 
-void GPUTreeLearner::AllocateGPUMemory() {
+void FPGATreeLearner::AllocateFPGAMemory() {
   num_dense_feature_groups_ = 0;
   for (int i = 0; i < num_feature_groups_; ++i) {
     if (ordered_bins_[i] == nullptr) {
@@ -247,14 +248,15 @@ void GPUTreeLearner::AllocateGPUMemory() {
   dense_feature_group_map_.clear();
   device_bin_mults_.clear();
   sparse_feature_group_map_.clear();
-  // do nothing if no features can be processed on GPU
+  // do nothing if no features can be processed on FPGA
   if (!num_dense_feature_groups_) {
-    Log::Warning("GPU acceleration is disabled because no non-trival dense features can be found");
+    Log::Warning("FPGA acceleration is disabled because no non-trival dense features can be found");
     return;
   }
   // allocate memory for all features (FIXME: 4 GB barrier on some devices, need to split to multiple buffers)
   device_features_.reset();
-  device_features_ = std::unique_ptr<boost::compute::vector<Feature4>>(new boost::compute::vector<Feature4>(num_dense_feature4_ * num_data_, ctx_));
+  //device_features_ = std::unique_ptr<boost::compute::vector<Feature4>>(new boost::compute::vector<Feature4>(num_dense_feature4_ * num_data_, ctx_));
+  device_features_ = std::unique_ptr<cl::vector<Feature4>>(new cl::vector<Feature4>(num_dense_feature4_ * num_data_, ctx_));
   // unpin old buffer if necessary before destructing them
   if (ptr_pinned_gradients_) {
     queue_.enqueue_unmap_buffer(pinned_gradients_, ptr_pinned_gradients_);
@@ -268,60 +270,88 @@ void GPUTreeLearner::AllocateGPUMemory() {
   // make ordered_gradients and hessians larger (including extra room for prefetching), and pin them 
   ordered_gradients_.reserve(allocated_num_data_);
   ordered_hessians_.reserve(allocated_num_data_);
-  pinned_gradients_ = boost::compute::buffer(); // deallocate
-  pinned_gradients_ = boost::compute::buffer(ctx_, allocated_num_data_ * sizeof(score_t), 
-                                             boost::compute::memory_object::read_write | boost::compute::memory_object::use_host_ptr, 
+  //pinned_gradients_ = boost::compute::buffer(); // deallocate
+  pinned_gradients_ = cl::buffer(); // deallocate
+  //pinned_gradients_ = boost::compute::buffer(ctx_, allocated_num_data_ * sizeof(score_t), 
+  pinned_gradients_ = cl::buffer(ctx_, allocated_num_data_ * sizeof(score_t), 
+                                             //boost::compute::memory_object::read_write | boost::compute::memory_object::use_host_ptr, 
+                                             CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR,
                                              ordered_gradients_.data());
-  ptr_pinned_gradients_ = queue_.enqueue_map_buffer(pinned_gradients_, boost::compute::command_queue::map_write_invalidate_region, 
+  ptr_pinned_gradients_ = queue_.enqueue_map_buffer(pinned_gradients_, //boost::compute::command_queue::map_write_invalidate_region, 
+                                                    CL_MAP_WRITE_INVALIDATE_REGION,
                                                     0, allocated_num_data_ * sizeof(score_t));
-  pinned_hessians_ = boost::compute::buffer(); // deallocate
-  pinned_hessians_  = boost::compute::buffer(ctx_, allocated_num_data_ * sizeof(score_t), 
-                                             boost::compute::memory_object::read_write | boost::compute::memory_object::use_host_ptr, 
+  //pinned_hessians_ = boost::compute::buffer(); // deallocate
+  pinned_hessians_ = cl::buffer(); // deallocate
+  //pinned_hessians_  = boost::compute::buffer(ctx_, allocated_num_data_ * sizeof(score_t), 
+  pinned_hessians_  = cl::buffer(ctx_, allocated_num_data_ * sizeof(score_t), 
+                                             //boost::compute::memory_object::read_write | boost::compute::memory_object::use_host_ptr, 
+                                             CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR,
                                              ordered_hessians_.data());
-  ptr_pinned_hessians_ = queue_.enqueue_map_buffer(pinned_hessians_, boost::compute::command_queue::map_write_invalidate_region, 
+  ptr_pinned_hessians_ = queue_.enqueue_map_buffer(pinned_hessians_,// boost::compute::command_queue::map_write_invalidate_region, 
+                                                   CL_MAP_WRITE_INVALIDATE_REGION,
                                                    0, allocated_num_data_ * sizeof(score_t));
   // allocate space for gradients and hessians on device
   // we will copy gradients and hessians in after ordered_gradients_ and ordered_hessians_ are constructed
-  device_gradients_ = boost::compute::buffer(); // deallocate
-  device_gradients_ = boost::compute::buffer(ctx_, allocated_num_data_ * sizeof(score_t), 
-                      boost::compute::memory_object::read_only, nullptr);
-  device_hessians_ = boost::compute::buffer(); // deallocate
-  device_hessians_  = boost::compute::buffer(ctx_, allocated_num_data_ * sizeof(score_t), 
-                      boost::compute::memory_object::read_only, nullptr);
+  //device_gradients_ = boost::compute::buffer(); // deallocate
+  device_gradients_ = cl::buffer(); // deallocate
+  //device_gradients_ = boost::compute::buffer(ctx_, allocated_num_data_ * sizeof(score_t), 
+  device_gradients_ = cl::buffer(ctx_, allocated_num_data_ * sizeof(score_t), 
+                      //boost::compute::memory_object::read_only, nullptr);
+                      CL_MEM_READ_ONLY, nullptr);
+  //device_hessians_ = boost::compute::buffer(); // deallocate
+  device_hessians_ = cl::buffer(); // deallocate
+  //device_hessians_  = boost::compute::buffer(ctx_, allocated_num_data_ * sizeof(score_t), 
+  device_hessians_  = cl::buffer(ctx_, allocated_num_data_ * sizeof(score_t), 
+                      //boost::compute::memory_object::read_only, nullptr);
+                      CL_MEM_READ_ONLY, nullptr);
   // allocate feature mask, for disabling some feature-groups' histogram calculation
   feature_masks_.resize(num_dense_feature4_ * dword_features_);
-  device_feature_masks_ = boost::compute::buffer(); // deallocate
-  device_feature_masks_ = boost::compute::buffer(ctx_, num_dense_feature4_ * dword_features_, 
-                          boost::compute::memory_object::read_only, nullptr);
+  //device_feature_masks_ = boost::compute::buffer(); // deallocate
+  device_feature_masks_ = cl::buffer(); // deallocate
+  //device_feature_masks_ = boost::compute::buffer(ctx_, num_dense_feature4_ * dword_features_, 
+  device_feature_masks_ = cl::buffer(ctx_, num_dense_feature4_ * dword_features_, 
+                          //boost::compute::memory_object::read_only, nullptr);
+                          CL_MEM_READ_ONLY, nullptr);
   pinned_feature_masks_ = boost::compute::buffer(ctx_, num_dense_feature4_ * dword_features_, 
-                                             boost::compute::memory_object::read_write | boost::compute::memory_object::use_host_ptr, 
+                                             //boost::compute::memory_object::read_write | boost::compute::memory_object::use_host_ptr, 
+                                             CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR,
                                              feature_masks_.data());
-  ptr_pinned_feature_masks_ = queue_.enqueue_map_buffer(pinned_feature_masks_, boost::compute::command_queue::map_write_invalidate_region,
+  ptr_pinned_feature_masks_ = queue_.enqueue_map_buffer(pinned_feature_masks_, //boost::compute::command_queue::map_write_invalidate_region,
+                                                        CL_MAP_WRITE_INVALIDATE_REGION,
                                                         0, num_dense_feature4_ * dword_features_);
   memset(ptr_pinned_feature_masks_, 0, num_dense_feature4_ * dword_features_);
   // copy indices to the device
   device_data_indices_.reset();
-  device_data_indices_ = std::unique_ptr<boost::compute::vector<data_size_t>>(new boost::compute::vector<data_size_t>(allocated_num_data_, ctx_));
-  boost::compute::fill(device_data_indices_->begin(), device_data_indices_->end(), 0, queue_);
+  //device_data_indices_ = std::unique_ptr<boost::compute::vector<data_size_t>>(new boost::compute::vector<data_size_t>(allocated_num_data_, ctx_));
+  device_data_indices_ = std::unique_ptr<cl::vector<data_size_t>>(new cl::vector<data_size_t>(allocated_num_data_, ctx_));
+  //boost::compute::fill(device_data_indices_->begin(), device_data_indices_->end(), 0, queue_);
+  cl::fill(device_data_indices_->begin(), device_data_indices_->end(), 0, queue_);
   // histogram bin entry size depends on the precision (single/double)
-  hist_bin_entry_sz_ = config_->gpu_use_dp ? sizeof(HistogramBinEntry) : sizeof(GPUHistogramBinEntry);
+  hist_bin_entry_sz_ = config_->FPGA_use_dp ? sizeof(HistogramBinEntry) : sizeof(FPGAHistogramBinEntry);
   Log::Info("Size of histogram bin entry: %d", hist_bin_entry_sz_);
   // create output buffer, each feature has a histogram with device_bin_size_ bins,
   // each work group generates a sub-histogram of dword_features_ features.
   if (!device_subhistograms_) {
     // only initialize once here, as this will not need to change when ResetTrainingData() is called
-    device_subhistograms_ = std::unique_ptr<boost::compute::vector<char>>(new boost::compute::vector<char>(
+    //device_subhistograms_ = std::unique_ptr<boost::compute::vector<char>>(new boost::compute::vector<char>(
+    device_subhistograms_ = std::unique_ptr<cl::vector<char>>(new cl::vector<char>(
                               preallocd_max_num_wg_ * dword_features_ * device_bin_size_ * hist_bin_entry_sz_, ctx_));
   }
   // create atomic counters for inter-group coordination
   sync_counters_.reset();
-  sync_counters_ = std::unique_ptr<boost::compute::vector<int>>(new boost::compute::vector<int>(
+  //sync_counters_ = std::unique_ptr<boost::compute::vector<int>>(new boost::compute::vector<int>(
+  sync_counters_ = std::unique_ptr<cl::vector<int>>(new cl::vector<int>(
                     num_dense_feature4_, ctx_));
-  boost::compute::fill(sync_counters_->begin(), sync_counters_->end(), 0, queue_);
+  //boost::compute::fill(sync_counters_->begin(), sync_counters_->end(), 0, queue_);
+  cl::fill(sync_counters_->begin(), sync_counters_->end(), 0, queue_);
   // The output buffer is allocated to host directly, to overlap compute and data transfer
-  device_histogram_outputs_ = boost::compute::buffer(); // deallocate
-  device_histogram_outputs_ = boost::compute::buffer(ctx_, num_dense_feature4_ * dword_features_ * device_bin_size_ * hist_bin_entry_sz_, 
-                           boost::compute::memory_object::write_only | boost::compute::memory_object::alloc_host_ptr, nullptr);
+  //device_histogram_outputs_ = boost::compute::buffer(); // deallocate
+  device_histogram_outputs_ = cl::buffer(); // deallocate
+  //device_histogram_outputs_ = boost::compute::buffer(ctx_, num_dense_feature4_ * dword_features_ * device_bin_size_ * hist_bin_entry_sz_, 
+  device_histogram_outputs_ = cl::buffer(ctx_, num_dense_feature4_ * dword_features_ * device_bin_size_ * hist_bin_entry_sz_, 
+                           //boost::compute::memory_object::write_only | boost::compute::memory_object::alloc_host_ptr, 
+                           CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR;
+                           nullptr);
   // find the dense feature-groups and group then into Feature4 data structure (several feature-groups packed into 4 bytes)
   int k = 0, copied_feature4 = 0;
   std::vector<int> dense_dword_ind(dword_features_);
@@ -334,7 +364,7 @@ void GPUTreeLearner::AllocateGPUMemory() {
       // multiplier must be a power of 2
       device_bin_mults_.push_back((int)round(pow(2, floor(log2(t)))));
       // device_bin_mults_.push_back(1);
-      #if GPU_DEBUG >= 1
+      #if FPGA_DEBUG >= 1
       printf("feature-group %d using multiplier %d\n", i, device_bin_mults_.back());
       #endif
       k++;
@@ -357,15 +387,21 @@ void GPUTreeLearner::AllocateGPUMemory() {
   int nthreads = std::min(omp_get_max_threads(), (int)dense_feature_group_map_.size() / dword_features_);
   nthreads = std::max(nthreads, 1);
   std::vector<Feature4*> host4_vecs(nthreads);
-  std::vector<boost::compute::buffer> host4_bufs(nthreads);
+  //std::vector<boost::compute::buffer> host4_bufs(nthreads);
+  std::vector<cl::buffer> host4_bufs(nthreads);
   std::vector<Feature4*> host4_ptrs(nthreads);
   // preallocate arrays for all threads, and pin them
   for (int i = 0; i < nthreads; ++i) {
-    host4_vecs[i] = (Feature4*)boost::alignment::aligned_alloc(4096, num_data_ * sizeof(Feature4));
-    host4_bufs[i] = boost::compute::buffer(ctx_, num_data_ * sizeof(Feature4), 
-                    boost::compute::memory_object::read_write | boost::compute::memory_object::use_host_ptr, 
+    //host4_vecs[i] = (Feature4*)boost::alignment::aligned_alloc(4096, num_data_ * sizeof(Feature4));
+    host4_vecs[i] = (Feature4*)std::aligned_alloc(4096, num_data_ * sizeof(Feature4));
+    //host4_bufs[i] = boost::compute::buffer(ctx_, num_data_ * sizeof(Feature4), 
+    host4_bufs[i] = cl::buffer(ctx_, num_data_ * sizeof(Feature4), 
+                    //boost::compute::memory_object::read_write | boost::compute::memory_object::use_host_ptr, 
+                    CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, 
                     host4_vecs[i]);
-    host4_ptrs[i] = (Feature4*)queue_.enqueue_map_buffer(host4_bufs[i], boost::compute::command_queue::map_write_invalidate_region,
+    host4_ptrs[i] = (Feature4*)queue_.enqueue_map_buffer(host4_bufs[i],
+                    //boost::compute::command_queue::map_write_invalidate_region,
+                    CL_MAP_WRITE_INVALIDATE_REGION,
                     0, num_data_ * sizeof(Feature4));
   }
   // building Feature4 bundles; each thread handles dword_features_ features
@@ -375,7 +411,7 @@ void GPUTreeLearner::AllocateGPUMemory() {
     Feature4* host4 = host4_ptrs[tid];
     auto dense_ind = dense_feature_group_map_.begin() + i * dword_features_;
     auto dev_bin_mult = device_bin_mults_.begin() + i * dword_features_;
-    #if GPU_DEBUG >= 1
+    #if FPGA_DEBUG >= 1
     printf("Copying feature group ");
     for (int l = 0; l < dword_features_; ++l) {
       printf("%d ", dense_ind[l]);
@@ -388,7 +424,7 @@ void GPUTreeLearner::AllocateGPUMemory() {
       for (int s_idx = 0; s_idx < 8; ++s_idx) {
         bin_iters[s_idx] = train_data_->FeatureGroupIterator(dense_ind[s_idx]);
         if (dynamic_cast<Dense4bitsBinIterator*>(bin_iters[s_idx]) == 0) {
-          Log::Fatal("GPU tree learner assumes that all bins are Dense4bitsBin when num_bin <= 16, but feature %d is not", dense_ind[s_idx]);
+          Log::Fatal("FPGA tree learner assumes that all bins are Dense4bitsBin when num_bin <= 16, but feature %d is not", dense_ind[s_idx]);
         }
       }
       // this guarantees that the RawGet() function is inlined, rather than using virtual function dispatching
@@ -432,16 +468,16 @@ void GPUTreeLearner::AllocateGPUMemory() {
           }
         }
         else {
-          Log::Fatal("Bug in GPU tree builder: only DenseBin and Dense4bitsBin are supported"); 
+          Log::Fatal("Bug in FPGA tree builder: only DenseBin and Dense4bitsBin are supported"); 
         }
       }
     }
     else {
-      Log::Fatal("Bug in GPU tree builder: dword_features_ can only be 4 or 8");
+      Log::Fatal("Bug in FPGA tree builder: dword_features_ can only be 4 or 8");
     }
     queue_.enqueue_write_buffer(device_features_->get_buffer(),
                         i * num_data_ * sizeof(Feature4), num_data_ * sizeof(Feature4), host4);
-    #if GPU_DEBUG >= 1
+    #if FPGA_DEBUG >= 1
     printf("first example of feature-group tuple is: %d %d %d %d\n", host4[0].s0, host4[0].s1, host4[0].s2, host4[0].s3);
     printf("Feature-groups copied to device with multipliers ");
     for (int l = 0; l < dword_features_; ++l) {
@@ -456,7 +492,7 @@ void GPUTreeLearner::AllocateGPUMemory() {
     if (dword_features_ == 8) {
       memset(host4, 0, num_data_ * sizeof(Feature4));
     }
-    #if GPU_DEBUG >= 1
+    #if FPGA_DEBUG >= 1
     printf("%d features left\n", k);
     #endif
     for (int i = 0; i < k; ++i) {
@@ -472,7 +508,7 @@ void GPUTreeLearner::AllocateGPUMemory() {
           }
         }
         else {
-          Log::Fatal("GPU tree learner assumes that all bins are Dense4bitsBin when num_bin <= 16, but feature %d is not", dense_dword_ind[i]);
+          Log::Fatal("FPGA tree learner assumes that all bins are Dense4bitsBin when num_bin <= 16, but feature %d is not", dense_dword_ind[i]);
         }
       }
       else if (dword_features_ == 4) {
@@ -494,11 +530,11 @@ void GPUTreeLearner::AllocateGPUMemory() {
           }
         }
         else {
-          Log::Fatal("BUG in GPU tree builder: only DenseBin and Dense4bitsBin are supported"); 
+          Log::Fatal("BUG in FPGA tree builder: only DenseBin and Dense4bitsBin are supported"); 
         }
       }
       else {
-        Log::Fatal("Bug in GPU tree builder: dword_features_ can only be 4 or 8");
+        Log::Fatal("Bug in FPGA tree builder: dword_features_ can only be 4 or 8");
       }
     }
     // fill the leftover features
@@ -523,7 +559,7 @@ void GPUTreeLearner::AllocateGPUMemory() {
     // copying the last 1 to (dword_features - 1) feature-groups in the last tuple
     queue_.enqueue_write_buffer(device_features_->get_buffer(),
                         (num_dense_feature4_ - 1) * num_data_ * sizeof(Feature4), num_data_ * sizeof(Feature4), host4);
-    #if GPU_DEBUG >= 1
+    #if FPGA_DEBUG >= 1
     printf("Last features copied to device\n");
     #endif
     for (int i = 0; i < k; ++i) {
@@ -533,15 +569,17 @@ void GPUTreeLearner::AllocateGPUMemory() {
   // deallocate pinned space for feature copying
   for (int i = 0; i < nthreads; ++i) {
       queue_.enqueue_unmap_buffer(host4_bufs[i], host4_ptrs[i]);
-      host4_bufs[i] = boost::compute::buffer();
-      boost::alignment::aligned_free(host4_vecs[i]);
+      //host4_bufs[i] = boost::compute::buffer();
+      host4_bufs[i] = cl::buffer();
+      //boost::alignment::aligned_free(host4_vecs[i]);
+      std::aligned_free(host4_vecs[i]);
   }
   // data transfer time
   std::chrono::duration<double, std::milli> end_time = std::chrono::steady_clock::now() - start_time;
-  Log::Info("%d dense feature groups (%.2f MB) transfered to GPU in %f secs. %d sparse feature groups", 
+  Log::Info("%d dense feature groups (%.2f MB) transfered to FPGA in %f secs. %d sparse feature groups", 
             dense_feature_group_map_.size(), ((dense_feature_group_map_.size() + (dword_features_ - 1)) / dword_features_) * num_data_ * sizeof(Feature4) / (1024.0 * 1024.0), 
             end_time * 1e-3, sparse_feature_group_map_.size());
-  #if GPU_DEBUG >= 1
+  #if FPGA_DEBUG >= 1
   printf("Dense feature group list (size %lu): ", dense_feature_group_map_.size());
   for (int i = 0; i < num_dense_feature_groups_; ++i) {
     printf("%d ", dense_feature_group_map_[i]);
@@ -555,7 +593,7 @@ void GPUTreeLearner::AllocateGPUMemory() {
   #endif
 }
 
-std::string GPUTreeLearner::GetBuildLog(const std::string &opts) {
+std::string FPGATreeLearner::GetBuildLog(const std::string &opts) {
   boost::compute::program program = boost::compute::program::create_with_source(kernel_source_, ctx_);
   try {
     program.build(opts);
@@ -578,7 +616,7 @@ std::string GPUTreeLearner::GetBuildLog(const std::string &opts) {
   return program.build_log();
 }
 
-void GPUTreeLearner::BuildGPUKernels() {
+void FPGATreeLearner::BuildFPGAKernels() {
   Log::Info("Compiling OpenCL Kernel with %d bins...", device_bin_size_);
   // destroy any old kernels
   histogram_kernels_.clear();
@@ -588,73 +626,83 @@ void GPUTreeLearner::BuildGPUKernels() {
   histogram_kernels_.resize(kMaxLogWorkgroupsPerFeature+1);
   histogram_allfeats_kernels_.resize(kMaxLogWorkgroupsPerFeature+1);
   histogram_fulldata_kernels_.resize(kMaxLogWorkgroupsPerFeature+1);
-  // currently we don't use constant memory
-  int use_constants = 0;
-  OMP_INIT_EX();
-  #pragma omp parallel for schedule(guided)
-  for (int i = 0; i <= kMaxLogWorkgroupsPerFeature; ++i) {
-    OMP_LOOP_EX_BEGIN();
-    boost::compute::program program;
-    std::ostringstream opts;
-    // compile the GPU kernel depending if double precision is used, constant hessian is used, etc 
-    opts << " -D POWER_FEATURE_WORKGROUPS=" << i
-         << " -D USE_CONSTANT_BUF=" << use_constants << " -D USE_DP_FLOAT=" << int(config_->gpu_use_dp)
-         << " -D CONST_HESSIAN=" << int(is_constant_hessian_)
-         << " -cl-mad-enable -cl-no-signed-zeros -cl-fast-relaxed-math";
-    #if GPU_DEBUG >= 1
-    std::cout << "Building GPU kernels with options: " << opts.str() << std::endl;
-    #endif
-    // kernel with indices in an array
-    try {
-      program = boost::compute::program::build_with_source(kernel_source_, ctx_, opts.str());
-    }
-    catch (boost::compute::opencl_error &e) {
-      #pragma omp critical
-      {
-        std::cerr << "Build Options:" << opts.str() << std::endl;
-        std::cerr << "Build Log:" << std::endl << GetBuildLog(opts.str()) << std::endl;
-        Log::Fatal("Cannot build GPU program: %s", e.what());
-      }
-    }
-    histogram_kernels_[i] = program.create_kernel(kernel_name_);
-    
-    // kernel with all features enabled, with elimited branches
-    opts << " -D ENABLE_ALL_FEATURES=1";
-    try {
-      program = boost::compute::program::build_with_source(kernel_source_, ctx_, opts.str());
-    }
-    catch (boost::compute::opencl_error &e) {
-      #pragma omp critical
-      {
-        std::cerr << "Build Options:" << opts.str() << std::endl;
-        std::cerr << "Build Log:" << std::endl << GetBuildLog(opts.str()) << std::endl;
-        Log::Fatal("Cannot build GPU program: %s", e.what());
-      }
-    }
-    histogram_allfeats_kernels_[i] = program.create_kernel(kernel_name_);
 
-    // kernel with all data indices (for root node, and assumes that root node always uses all features)
-    opts << " -D IGNORE_INDICES=1";
-    try {
-      program = boost::compute::program::build_with_source(kernel_source_, ctx_, opts.str());
-    }
-    catch (boost::compute::opencl_error &e) {
-      #pragma omp critical
-      {
-        std::cerr << "Build Options:" << opts.str() << std::endl;
-        std::cerr << "Build Log:" << std::endl << GetBuildLog(opts.str()) << std::endl;
-        Log::Fatal("Cannot build GPU program: %s", e.what());
-      }
-    }
-    histogram_fulldata_kernels_[i] = program.create_kernel(kernel_name_);
-    OMP_LOOP_EX_END();
-  }
-  OMP_THROW_EX();
-  Log::Info("GPU programs have been built");
+  std::string device_name = dev_.getInfo<CL_DEVICE_NAME>();
+  std::string binaryFile = xcl::find_binary_file(device_name,"fpga64");
+  cl::Program::Binaries binary_file = xcl::import_binary_file(binaryFile);
+  devices.resize(1);
+  program = cl::Program(context, devices, binary_file);
+
+  histogram_kernels_[0] = cl::Kernel(program, "histogram64");
+  histogram_allfeats_kernels_[0] = cl::Kernel(program, "histogram64");
+  histogram_fulldata_kernels_[0] = cl::Kernel(program, "histogram64");
+  // currently we don't use constant memory
+  // int use_constants = 0;
+  // OMP_INIT_EX();
+  // #pragma omp parallel for schedule(guided)
+  // for (int i = 0; i <= kMaxLogWorkgroupsPerFeature; ++i) {
+  //   OMP_LOOP_EX_BEGIN();
+  //   boost::compute::program program;
+  //   std::ostringstream opts;
+  //   // compile the FPGA kernel depending if double precision is used, constant hessian is used, etc 
+  //   opts << " -D POWER_FEATURE_WORKGROUPS=" << i
+  //        << " -D USE_CONSTANT_BUF=" << use_constants << " -D USE_DP_FLOAT=" << int(config_->FPGA_use_dp)
+  //        << " -D CONST_HESSIAN=" << int(is_constant_hessian_)
+  //        << " -cl-mad-enable -cl-no-signed-zeros -cl-fast-relaxed-math";
+  //   #if FPGA_DEBUG >= 1
+  //   std::cout << "Building FPGA kernels with options: " << opts.str() << std::endl;
+  //   #endif
+  //   // kernel with indices in an array
+  //   try {
+  //     program = boost::compute::program::build_with_source(kernel_source_, ctx_, opts.str());
+  //   }
+  //   catch (boost::compute::opencl_error &e) {
+  //     #pragma omp critical
+  //     {
+  //       std::cerr << "Build Options:" << opts.str() << std::endl;
+  //       std::cerr << "Build Log:" << std::endl << GetBuildLog(opts.str()) << std::endl;
+  //       Log::Fatal("Cannot build FPGA program: %s", e.what());
+  //     }
+  //   }
+  //   histogram_kernels_[i] = program.create_kernel(kernel_name_);
+    
+  //   // kernel with all features enabled, with elimited branches
+  //   opts << " -D ENABLE_ALL_FEATURES=1";
+  //   try {
+  //     program = boost::compute::program::build_with_source(kernel_source_, ctx_, opts.str());
+  //   }
+  //   catch (boost::compute::opencl_error &e) {
+  //     #pragma omp critical
+  //     {
+  //       std::cerr << "Build Options:" << opts.str() << std::endl;
+  //       std::cerr << "Build Log:" << std::endl << GetBuildLog(opts.str()) << std::endl;
+  //       Log::Fatal("Cannot build FPGA program: %s", e.what());
+  //     }
+  //   }
+  //   histogram_allfeats_kernels_[i] = program.create_kernel(kernel_name_);
+
+  //   // kernel with all data indices (for root node, and assumes that root node always uses all features)
+  //   opts << " -D IGNORE_INDICES=1";
+  //   try {
+  //     program = boost::compute::program::build_with_source(kernel_source_, ctx_, opts.str());
+  //   }
+  //   catch (boost::compute::opencl_error &e) {
+  //     #pragma omp critical
+  //     {
+  //       std::cerr << "Build Options:" << opts.str() << std::endl;
+  //       std::cerr << "Build Log:" << std::endl << GetBuildLog(opts.str()) << std::endl;
+  //       Log::Fatal("Cannot build FPGA program: %s", e.what());
+  //     }
+  //   }
+  //   histogram_fulldata_kernels_[i] = program.create_kernel(kernel_name_);
+  //   OMP_LOOP_EX_END();
+  // }
+  // OMP_THROW_EX();
+  Log::Info("FPGA programs have been prepared");
 }
 
-void GPUTreeLearner::SetupKernelArguments() {
-  // do nothing if no features can be processed on GPU
+void FPGATreeLearner::SetupKernelArguments() {
+  // do nothing if no features can be processed on FPGA
   if (!num_dense_feature_groups_) {
     return;
   }
@@ -663,126 +711,215 @@ void GPUTreeLearner::SetupKernelArguments() {
     if (is_constant_hessian_) {
       // hessian is passed as a parameter, but it is not available now. 
       // hessian will be set in BeforeTrain()
-      histogram_kernels_[i].set_args(*device_features_, device_feature_masks_, num_data_,
-                                         *device_data_indices_, num_data_, device_gradients_, 0.0f,
-                                         *device_subhistograms_, *sync_counters_, device_histogram_outputs_);
-      histogram_allfeats_kernels_[i].set_args(*device_features_, device_feature_masks_, num_data_,
-                                         *device_data_indices_, num_data_, device_gradients_, 0.0f,
-                                         *device_subhistograms_, *sync_counters_, device_histogram_outputs_);
-      histogram_fulldata_kernels_[i].set_args(*device_features_, device_feature_masks_, num_data_,
-                                          *device_data_indices_, num_data_, device_gradients_, 0.0f,
-                                          *device_subhistograms_, *sync_counters_, device_histogram_outputs_);
+      // histogram_kernels_[i].set_args(*device_features_, device_feature_masks_, num_data_,
+      //                                    *device_data_indices_, num_data_, device_gradients_, 0.0f,
+      //                                    *device_subhistograms_, *sync_counters_, device_histogram_outputs_);
+      histogram_kernels_[i].setАrg(0, *device_features_);
+      histogram_kernels_[i].setАrg(1, device_feature_masks_);
+      histogram_kernels_[i].setАrg(2, num_data);
+      histogram_kernels_[i].setАrg(3, *device_data_indices_);
+      histogram_kernels_[i].setАrg(4, num_data_);
+      histogram_kernels_[i].setАrg(5, device_gradients_);
+      histogram_kernels_[i].setАrg(6, 0.0f);
+      histogram_kernels_[i].setАrg(7, *device_subhistograms_);
+      histogram_kernels_[i].setАrg(8, *sync_counters_);
+      histogram_kernels_[i].setАrg(9, device_histogram_outputs_);
+
+      // histogram_allfeats_kernels_[i].set_args(*device_features_, device_feature_masks_, num_data_,
+      //                                    *device_data_indices_, num_data_, device_gradients_, 0.0f,
+      //                                    *device_subhistograms_, *sync_counters_, device_histogram_outputs_);
+
+      histogram_allfeats_kernels_[i].setАrg(0, *device_features_);
+      histogram_allfeats_kernels_[i].setАrg(1, device_feature_masks_);
+      histogram_allfeats_kernels_[i].setАrg(2, num_data_);
+      histogram_allfeats_kernels_[i].setАrg(3, *device_data_indices_);
+      histogram_allfeats_kernels_[i].setАrg(4, num_data_);
+      histogram_allfeats_kernels_[i].setАrg(5, device_gradients_);
+      histogram_allfeats_kernels_[i].setАrg(6, 0.0f);
+      histogram_allfeats_kernels_[i].setАrg(7, *device_subhistograms_);
+      histogram_allfeats_kernels_[i].setАrg(8, *sync_counters_);
+      histogram_allfeats_kernels_[i].setАrg(9, device_histogram_outputs_);
+
+      // histogram_fulldata_kernels_[i].set_args(*device_features_, device_feature_masks_, num_data_,
+      //                                     *device_data_indices_, num_data_, device_gradients_, 0.0f,
+      //                                     *device_subhistograms_, *sync_counters_, device_histogram_outputs_);
+
+      histogram_fulldata_kernels_[i].setАrg(0, *device_features_);
+      histogram_fulldata_kernels_[i].setАrg(1, device_feature_masks_);
+      histogram_fulldata_kernels_[i].setАrg(2, num_data_);
+      histogram_fulldata_kernels_[i].setАrg(3, *device_data_indices_);
+      histogram_fulldata_kernels_[i].setАrg(4, num_data_);
+      histogram_fulldata_kernels_[i].setАrg(5, device_gradients_);
+      histogram_fulldata_kernels_[i].setАrg(6, 0.0f);
+      histogram_fulldata_kernels_[i].setАrg(7, *device_subhistograms_);
+      histogram_fulldata_kernels_[i].setАrg(8, *sync_counters_);
+      histogram_fulldata_kernels_[i].setАrg(9, device_histogram_outputs_);
     }
     else {
-      histogram_kernels_[i].set_args(*device_features_, device_feature_masks_, num_data_,
-                                         *device_data_indices_, num_data_, device_gradients_, device_hessians_,
-                                         *device_subhistograms_, *sync_counters_, device_histogram_outputs_);
-      histogram_allfeats_kernels_[i].set_args(*device_features_, device_feature_masks_, num_data_,
-                                         *device_data_indices_, num_data_, device_gradients_, device_hessians_,
-                                         *device_subhistograms_, *sync_counters_, device_histogram_outputs_);
-      histogram_fulldata_kernels_[i].set_args(*device_features_, device_feature_masks_, num_data_,
-                                          *device_data_indices_, num_data_, device_gradients_, device_hessians_,
-                                          *device_subhistograms_, *sync_counters_, device_histogram_outputs_);
+      // histogram_kernels_[i].set_args(*device_features_, device_feature_masks_, num_data_,
+      //                                    *device_data_indices_, num_data_, device_gradients_, device_hessians_,
+      //                                    *device_subhistograms_, *sync_counters_, device_histogram_outputs_);
+
+      histogram_kernels_[i].setАrg(0, *device_features_);
+      histogram_kernels_[i].setАrg(1, device_feature_masks_);
+      histogram_kernels_[i].setАrg(2, num_data_);
+      histogram_kernels_[i].setАrg(3, *device_data_indices_);
+      histogram_kernels_[i].setАrg(4, num_data_);
+      histogram_kernels_[i].setАrg(5, device_gradients_);
+      histogram_kernels_[i].setАrg(6, device_hessians_);
+      histogram_kernels_[i].setАrg(7, *device_subhistograms_);
+      histogram_kernels_[i].setАrg(8, *sync_counters_);
+      histogram_kernels_[i].setАrg(9, device_histogram_outputs_);
+
+      // histogram_allfeats_kernels_[i].set_args(*device_features_, device_feature_masks_, num_data_,
+      //                                    *device_data_indices_, num_data_, device_gradients_, device_hessians_,
+      //                                    *device_subhistograms_, *sync_counters_, device_histogram_outputs_);
+
+      histogram_allfeats_kernels_[i].setАrg(0, *device_features_);
+      histogram_allfeats_kernels_[i].setАrg(1, device_feature_masks_);
+      histogram_allfeats_kernels_[i].setАrg(2, num_data_);
+      histogram_allfeats_kernels_[i].setАrg(3, *device_data_indices_);
+      histogram_allfeats_kernels_[i].setАrg(4, num_data_);
+      histogram_allfeats_kernels_[i].setАrg(5, device_gradients_);
+      histogram_allfeats_kernels_[i].setАrg(6, device_hessians_);
+      histogram_allfeats_kernels_[i].setАrg(7, *device_subhistograms_);
+      histogram_allfeats_kernels_[i].setАrg(8, *sync_counters_);
+      histogram_allfeats_kernels_[i].setАrg(9, device_histogram_outputs_);
+
+      // histogram_fulldata_kernels_[i].set_args(*device_features_, device_feature_masks_, num_data_,
+      //                                     *device_data_indices_, num_data_, device_gradients_, device_hessians_,
+      //                                     *device_subhistograms_, *sync_counters_, device_histogram_outputs_);
+
+      histogram_fulldata_kernels_[i].setАrg(0, *device_features_);
+      histogram_fulldata_kernels_[i].setАrg(1, device_feature_masks_);
+      histogram_fulldata_kernels_[i].setАrg(2, num_data_);
+      histogram_fulldata_kernels_[i].setАrg(3, *device_data_indices_);
+      histogram_fulldata_kernels_[i].setАrg(4, num_data_);
+      histogram_fulldata_kernels_[i].setАrg(5, device_gradients_);
+      histogram_fulldata_kernels_[i].setАrg(6, device_hessians_);
+      histogram_fulldata_kernels_[i].setАrg(7, *device_subhistograms_);
+      histogram_fulldata_kernels_[i].setАrg(8, *sync_counters_);
+      histogram_fulldata_kernels_[i].setАrg(9, device_histogram_outputs_);
     }
   }
 }
 
-void GPUTreeLearner::InitGPU(int platform_id, int device_id) {
-  // Get the max bin size, used for selecting best GPU kernel
+//void FPGATreeLearner::InitFPGA(int platform_id, int device_id) { //
+void FPGATreeLearner::InitFPGA() { //
+  // Get the max bin size, used for selecting best FPGA kernel
   max_num_bin_ = 0;
-  #if GPU_DEBUG >= 1
+  #if FPGA_DEBUG >= 1
   printf("bin size: ");
   #endif
   for (int i = 0; i < num_feature_groups_; ++i) {
-    #if GPU_DEBUG >= 1
+    #if FPGA_DEBUG >= 1
     printf("%d, ", train_data_->FeatureGroupNumBin(i));
     #endif
     max_num_bin_ = std::max(max_num_bin_, train_data_->FeatureGroupNumBin(i));
   }
-  #if GPU_DEBUG >= 1
+  #if FPGA_DEBUG >= 1
   printf("\n");
   #endif
-  // initialize GPU
-  dev_ = boost::compute::system::default_device();
-  if (platform_id >= 0 && device_id >= 0) {
-    const std::vector<boost::compute::platform> platforms = boost::compute::system::platforms();
-    if ((int)platforms.size() > platform_id) {
-      const std::vector<boost::compute::device> platform_devices = platforms[platform_id].devices();
-      if ((int)platform_devices.size() > device_id) {
-        Log::Info("Using requested OpenCL platform %d device %d", platform_id, device_id);
-        dev_ = platform_devices[device_id];
-      }   
-    }   
-  }   
+  // initialize FPGA
+  //dev_ = boost::compute::system::default_device();
+  devices = xcl::get_xil_devices();
+  dev_ = devices[0];
+  // if (platform_id >= 0 && device_id >= 0) {
+  //   const std::vector<boost::compute::platform> platforms = boost::compute::system::platforms();
+  //   if ((int)platforms.size() > platform_id) {
+  //     const std::vector<boost::compute::device> platform_devices = platforms[platform_id].devices();
+  //     if ((int)platform_devices.size() > device_id) {
+  //       Log::Info("Using requested OpenCL platform %d device %d", platform_id, device_id);
+  //       dev_ = platform_devices[device_id];
+  //     }   
+  //   }   
+  // }   
   // determine which kernel to use based on the max number of bins
-  if (max_num_bin_ <= 16) {
-    kernel_source_ = kernel16_src_;
-    kernel_name_ = "histogram16";
-    device_bin_size_ = 16;
-    dword_features_ = 8;
-  }
-  else if (max_num_bin_ <= 64) {
-    kernel_source_ = kernel64_src_;
-    kernel_name_ = "histogram64";
-    device_bin_size_ = 64;
-    dword_features_ = 4;
-  }
-  else if ( max_num_bin_ <= 256) {
-    kernel_source_ = kernel256_src_;
-    kernel_name_ = "histogram256";
-    device_bin_size_ = 256;
-    dword_features_ = 4;
-  }
-  else {
-    Log::Fatal("bin size %d cannot run on GPU", max_num_bin_);
-  }
-  if(max_num_bin_ == 65) {
-    Log::Warning("Setting max_bin to 63 is sugguested for best performance");
-  }
-  if(max_num_bin_ == 17) {
-    Log::Warning("Setting max_bin to 15 is sugguested for best performance");
-  }
-  ctx_ = boost::compute::context(dev_);
-  queue_ = boost::compute::command_queue(ctx_, dev_);
-  Log::Info("Using GPU Device: %s, Vendor: %s", dev_.name().c_str(), dev_.vendor().c_str());
-  BuildGPUKernels();
-  AllocateGPUMemory();
-  // setup GPU kernel arguments after we allocating all the buffers
+  // if (max_num_bin_ <= 16) {
+  //   kernel_source_ = kernel16_src_;
+  //   kernel_name_ = "histogram16";
+  //   device_bin_size_ = 16;
+  //   dword_features_ = 8;
+  // }
+  // else if (max_num_bin_ <= 64) {
+  //   kernel_source_ = kernel64_src_;
+     kernel_name_ = "histogram64";
+     device_bin_size_ = 64;
+     dword_features_ = 4;
+  // }
+  // else if ( max_num_bin_ <= 256) {
+  //   kernel_source_ = kernel256_src_;
+  //   kernel_name_ = "histogram256";
+  //   device_bin_size_ = 256;
+  //   dword_features_ = 4;
+  // }
+  // else {
+  //   Log::Fatal("bin size %d cannot run on FPGA", max_num_bin_);
+  // }
+  // if(max_num_bin_ == 65) {
+  //   Log::Warning("Setting max_bin to 63 is sugguested for best performance");
+  // }
+  // if(max_num_bin_ == 17) {
+  //   Log::Warning("Setting max_bin to 15 is sugguested for best performance");
+  // }
+  //ctx_ = boost::compute::context(dev_);
+  ctx_ = cl::Context(dev_);
+  //queue_ = boost::compute::command_queue(ctx_, dev_);
+  queue_ = cl::CommandQueue(ctx_, dev_, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+  Log::Info("Using FPGA Device: %s, Vendor: %s", dev_.name().c_str(), dev_.vendor().c_str());
+  BuildFPGAKernels();
+  AllocateFPGAMemory();
+  // setup FPGA kernel arguments after we allocating all the buffers
   SetupKernelArguments();
 }
 
-Tree* GPUTreeLearner::Train(const score_t* gradients, const score_t *hessians,
+Tree* FPGATreeLearner::Train(const score_t* gradients, const score_t *hessians,
                             bool is_constant_hessian, Json& forced_split_json) {
-  // check if we need to recompile the GPU kernel (is_constant_hessian changed)
+  // check if we need to recompile the FPGA kernel (is_constant_hessian changed)
   // this should rarely occur
   if (is_constant_hessian != is_constant_hessian_) {
-    Log::Info("Recompiling GPU kernel because hessian is %sa constant now", is_constant_hessian ? "" : "not ");
+    Log::Info("Recompiling FPGA kernel because hessian is %sa constant now", is_constant_hessian ? "" : "not ");
     is_constant_hessian_ = is_constant_hessian;
-    BuildGPUKernels();
+    BuildFPGAKernels();
     SetupKernelArguments();
   }
   return SerialTreeLearner::Train(gradients, hessians, is_constant_hessian, forced_split_json);
 }
 
-void GPUTreeLearner::ResetTrainingData(const Dataset* train_data) {
+void FPGATreeLearner::ResetTrainingData(const Dataset* train_data) {
   SerialTreeLearner::ResetTrainingData(train_data);
   num_feature_groups_ = train_data_->num_feature_groups();
-  // GPU memory has to been reallocated because data may have been changed
-  AllocateGPUMemory();
-  // setup GPU kernel arguments after we allocating all the buffers
+  // FPGA memory has to been reallocated because data may have been changed
+  AllocateFPGAMemory();
+  // setup FPGA kernel arguments after we allocating all the buffers
   SetupKernelArguments();
 }
 
-void GPUTreeLearner::BeforeTrain() {
+void FPGATreeLearner::BeforeTrain() {
 
-  #if GPU_DEBUG >= 2
+  #if FPGA_DEBUG >= 2
   printf("Copying intial full gradients and hessians to device\n");
   #endif
-  // Copy initial full hessians and gradients to GPU.
+  // Copy initial full hessians and gradients to FPGA.
   // We start copying as early as possible, instead of at ConstructHistogram().
   if (!use_bagging_ && num_dense_feature_groups_) {
     if (!is_constant_hessian_) {
-      hessians_future_ = queue_.enqueue_write_buffer_async(device_hessians_, 0, num_data_ * sizeof(score_t), hessians_);
+      /*event enqueue_write_buffer_async(const buffer &buffer,
+                                     size_t offset,
+                                     size_t size,
+                                     const void *host_ptr,
+                                     const wait_list &events = wait_list())*/
+      //hessians_future_ = queue_.enqueue_write_buffer_async(device_hessians_, 0, num_data_ * sizeof(score_t), hessians_);
+      /*cl_int  enqueueWriteBuffer (
+              const Buffer &buffer,
+              cl_bool blocking,
+              size_type offset,
+              size_type size,
+              const void *ptr,
+              const vector< Event > *events=NULL,
+              Event *event=NULL) const*/
+      //                        &buffer, blocking, offset, size, *ptr, vector<events>, event*
+      queue_.enqueueWriteBuffer(device_hessians_, false, 0, num_data_ * sizeof(score_t), hessians_, nullptr, &hessians_future_);
     }
     else {
       // setup hessian parameters only
@@ -794,29 +931,36 @@ void GPUTreeLearner::BeforeTrain() {
         histogram_fulldata_kernels_[i].set_arg(6, const_hessian);
       }
     }
-    gradients_future_ = queue_.enqueue_write_buffer_async(device_gradients_, 0, num_data_ * sizeof(score_t), gradients_);
+    //gradients_future_ = queue_.enqueue_write_buffer_async(device_gradients_, 0, num_data_ * sizeof(score_t), gradients_);
+    //                        &buffer, blocking, offset, size, *ptr, vector<events>, event*
+    queue_.enqueueWriteBuffer(device_gradients_, false, 0, num_data_ * sizeof(score_t), gradients_, nullptr, gradients_future_);
   }
 
   SerialTreeLearner::BeforeTrain();
 
   // use bagging
   if (data_partition_->leaf_count(0) != num_data_ && num_dense_feature_groups_) {
-    // On GPU, we start copying indices, gradients and hessians now, instead at ConstructHistogram()
+    // On FPGA, we start copying indices, gradients and hessians now, instead at ConstructHistogram()
     // copy used gradients and hessians to ordered buffer
     const data_size_t* indices = data_partition_->indices();
     data_size_t cnt = data_partition_->leaf_count(0);
-    #if GPU_DEBUG > 0
+    #if FPGA_DEBUG > 0
     printf("Using bagging, examples count = %d\n", cnt);
     #endif
-    // transfer the indices to GPU
-    indices_future_ = boost::compute::copy_async(indices, indices + cnt, device_data_indices_->begin(), queue_);
+    // transfer the indices to FPGA
+    //indices_future_ = boost::compute::copy_async(indices, indices + cnt, device_data_indices_->begin(), queue_);
+    // indices [0,cnt) -> device_data_indices
+    //                        &buffer, blocking, offset, size, *ptr, vector<events>, event*
+    queue_.enqueueWriteBuffer(device_data_indices_, false, 0, cnt * sizeof(data_size_t), indices, nullptr, indices_future_);
     if (!is_constant_hessian_) {
       #pragma omp parallel for schedule(static)
       for (data_size_t i = 0; i < cnt; ++i) {
         ordered_hessians_[i] = hessians_[indices[i]];
       }
-      // transfer hessian to GPU
-      hessians_future_ = queue_.enqueue_write_buffer_async(device_hessians_, 0, cnt * sizeof(score_t), ordered_hessians_.data());
+      // transfer hessian to FPGA
+      //hessians_future_ = queue_.enqueue_write_buffer_async(device_hessians_, 0, cnt * sizeof(score_t), ordered_hessians_.data());
+      //                        &buffer, blocking, offset, size, *ptr, vector<events>, event*
+      queue_.enqueueWriteBuffer(device_hessians_, false, 0, cnt * sizeof(score_t), ordered_hessians_.data(), hessians_future_);
     }
     else {
       // setup hessian parameters only
@@ -832,12 +976,14 @@ void GPUTreeLearner::BeforeTrain() {
     for (data_size_t i = 0; i < cnt; ++i) {
       ordered_gradients_[i] = gradients_[indices[i]];
     }
-    // transfer gradients to GPU
-    gradients_future_ = queue_.enqueue_write_buffer_async(device_gradients_, 0, cnt * sizeof(score_t), ordered_gradients_.data());
+    // transfer gradients to FPGA
+    //gradients_future_ = queue_.enqueue_write_buffer_async(device_gradients_, 0, cnt * sizeof(score_t), ordered_gradients_.data());
+    //                        &buffer, blocking, offset, size, *ptr, vector<events>, event*
+    queue_.enqueueWriteBuffer(device_gradients_, false, 0, cnt * sizeof(score_t), ordered_gradients_.data(), gradients_future_);
   }
 }
 
-bool GPUTreeLearner::BeforeFindBestSplit(const Tree* tree, int left_leaf, int right_leaf) {
+bool FPGATreeLearner::BeforeFindBestSplit(const Tree* tree, int left_leaf, int right_leaf) {
   int smaller_leaf;
   data_size_t num_data_in_left_child = GetGlobalDataCountInLeaf(left_leaf);
   data_size_t num_data_in_right_child = GetGlobalDataCountInLeaf(right_leaf);
@@ -858,37 +1004,42 @@ bool GPUTreeLearner::BeforeFindBestSplit(const Tree* tree, int left_leaf, int ri
     data_size_t begin = data_partition_->leaf_begin(smaller_leaf);
     data_size_t end = begin + data_partition_->leaf_count(smaller_leaf);
 
-    // copy indices to the GPU:
-    #if GPU_DEBUG >= 2
-    Log::Info("Copying indices, gradients and hessians to GPU...");
+    // copy indices to the FPGA:
+    #if FPGA_DEBUG >= 2
+    Log::Info("Copying indices, gradients and hessians to FPGA...");
     printf("Indices size %d being copied (left = %d, right = %d)\n", end - begin,num_data_in_left_child,num_data_in_right_child);
     #endif
-    indices_future_ = boost::compute::copy_async(indices + begin, indices + end, device_data_indices_->begin(), queue_);
+    //indices_future_ = boost::compute::copy_async(indices + begin, indices + end, device_data_indices_->begin(), queue_);
+    //                        &buffer, blocking, offset, size, *ptr, vector<events>, event*
+    queue_.enqueueWriteBuffer(device_data_indices_, false, begin, (end - begin) * sizeof(data_size_t), indices, nullptr, indices_future_);
 
     if (!is_constant_hessian_) {
       #pragma omp parallel for schedule(static)
       for (data_size_t i = begin; i < end; ++i) {
         ordered_hessians_[i - begin] = hessians_[indices[i]];
       }
-      // copy ordered hessians to the GPU:
-      hessians_future_ = queue_.enqueue_write_buffer_async(device_hessians_, 0, (end - begin) * sizeof(score_t), ptr_pinned_hessians_);
+      // copy ordered hessians to the FPGA:
+      //hessians_future_ = queue_.enqueue_write_buffer_async(device_hessians_, 0, (end - begin) * sizeof(score_t), ptr_pinned_hessians_);
+      //                        &buffer, blocking, offset, size, *ptr, vector<events>, event*
+      queue_.enqueueWriteBuffer(device_hessians_, false, 0, (end-begin)*sizeof(score_t), ptr_pinned_hessians_, hessians_future_);
     }
 
     #pragma omp parallel for schedule(static)
     for (data_size_t i = begin; i < end; ++i) {
       ordered_gradients_[i - begin] = gradients_[indices[i]];
     }
-    // copy ordered gradients to the GPU:
-    gradients_future_ = queue_.enqueue_write_buffer_async(device_gradients_, 0, (end - begin) * sizeof(score_t), ptr_pinned_gradients_);
+    // copy ordered gradients to the FPGA:
+    //gradients_future_ = queue_.enqueue_write_buffer_async(device_gradients_, 0, (end - begin) * sizeof(score_t), ptr_pinned_gradients_);
+    queue_.enqueueWriteBuffer(device_gradients_, false, 0, (end - begin) * sizeof(score_t), ptr_pinned_gradients_, gradients_future_);
 
-    #if GPU_DEBUG >= 2
+    #if FPGA_DEBUG >= 2
     Log::Info("Gradients/hessians/indices copied to device with size %d", end - begin);
     #endif
   }
   return SerialTreeLearner::BeforeFindBestSplit(tree, left_leaf, right_leaf);
 }
 
-bool GPUTreeLearner::ConstructGPUHistogramsAsync(
+bool FPGATreeLearner::ConstructFPGAHistogramsAsync(
   const std::vector<int8_t>& is_feature_used,
   const data_size_t* data_indices, data_size_t num_data,
   const score_t* gradients, const score_t* hessians,
@@ -897,14 +1048,16 @@ bool GPUTreeLearner::ConstructGPUHistogramsAsync(
   if (num_data <= 0) {
     return false;
   }
-  // do nothing if no features can be processed on GPU
+  // do nothing if no features can be processed on FPGA
   if (!num_dense_feature_groups_) {
     return false;
   }
   
   // copy data indices if it is not null
   if (data_indices != nullptr && num_data != num_data_) {
-    indices_future_ = boost::compute::copy_async(data_indices, data_indices + num_data, device_data_indices_->begin(), queue_);
+    //indices_future_ = boost::compute::copy_async(data_indices, data_indices + num_data, device_data_indices_->begin(), queue_);
+    //                        &buffer, blocking, offset, size, *ptr, vector<events>, event*
+    queue_.enqueueWriteBuffer(device_data_indices_, false, 0, num_data * sizeof(data_size_t), data_indices, nullptr, indices_future_);
   }
   // generate and copy ordered_gradients if gradients is not null
   if (gradients != nullptr) {
@@ -913,10 +1066,12 @@ bool GPUTreeLearner::ConstructGPUHistogramsAsync(
       for (data_size_t i = 0; i < num_data; ++i) {
         ordered_gradients[i] = gradients[data_indices[i]];
       }
-      gradients_future_ = queue_.enqueue_write_buffer_async(device_gradients_, 0, num_data * sizeof(score_t), ptr_pinned_gradients_);
+      //gradients_future_ = queue_.enqueue_write_buffer_async(device_gradients_, 0, num_data * sizeof(score_t), ptr_pinned_gradients_);
+      queue_.enqueueWriteBuffer(device_gradients_, false, 0, num_data * sizeof(score_t), ptr_pinned_gradients_, gradients_future_);
     }
     else {
-      gradients_future_ = queue_.enqueue_write_buffer_async(device_gradients_, 0, num_data * sizeof(score_t), gradients);
+      //gradients_future_ = queue_.enqueue_write_buffer_async(device_gradients_, 0, num_data * sizeof(score_t), gradients);
+      queue_.enqueueWriteBuffer(device_gradients_, false, 0, num_data * sizeof(score_t), gradients, gradients_future_);
     }
   }
   // generate and copy ordered_hessians if hessians is not null
@@ -926,10 +1081,12 @@ bool GPUTreeLearner::ConstructGPUHistogramsAsync(
       for (data_size_t i = 0; i < num_data; ++i) {
         ordered_hessians[i] = hessians[data_indices[i]];
       }
-      hessians_future_ = queue_.enqueue_write_buffer_async(device_hessians_, 0, num_data * sizeof(score_t), ptr_pinned_hessians_);
+      //hessians_future_ = queue_.enqueue_write_buffer_async(device_hessians_, 0, num_data * sizeof(score_t), ptr_pinned_hessians_);
+      queue_.enqueueWriteBuffer(device_hessians_, false, 0, num_data * sizeof(score_t), ptr_pinned_hessians_, hessians_future_);
     }
     else {
-      hessians_future_ = queue_.enqueue_write_buffer_async(device_hessians_, 0, num_data * sizeof(score_t), hessians);
+      //hessians_future_ = queue_.enqueue_write_buffer_async(device_hessians_, 0, num_data * sizeof(score_t), hessians);
+      queue_.enqueueWriteBuffer(device_hessians_, false, 0, num_data * sizeof(score_t), hessians, hessians_future_);
     }
   }
   // converted indices in is_feature_used to feature-group indices
@@ -953,11 +1110,11 @@ bool GPUTreeLearner::ConstructGPUHistogramsAsync(
     }
   }
   bool use_all_features = used_dense_feature_groups == num_dense_feature_groups_;
-  // if no feature group is used, just return and do not use GPU
+  // if no feature group is used, just return and do not use FPGA
   if (used_dense_feature_groups == 0) {
     return false;
   }
-#if GPU_DEBUG >= 1
+#if FPGA_DEBUG >= 1
   printf("Feature masks:\n");
   for (unsigned int i = 0; i < feature_masks_.size(); ++i) {
     printf("%d ", feature_masks_[i]);
@@ -965,17 +1122,18 @@ bool GPUTreeLearner::ConstructGPUHistogramsAsync(
   printf("\n");
   printf("%d feature groups, %d used, %d\n", num_dense_feature_groups_, used_dense_feature_groups, use_all_features);
 #endif
-  // if not all feature groups are used, we need to transfer the feature mask to GPU
-  // otherwise, we will use a specialized GPU kernel with all feature groups enabled
+  // if not all feature groups are used, we need to transfer the feature mask to FPGA
+  // otherwise, we will use a specialized FPGA kernel with all feature groups enabled
   if (!use_all_features) {
-    queue_.enqueue_write_buffer(device_feature_masks_, 0, num_dense_feature4_ * dword_features_, ptr_pinned_feature_masks_);
+    //queue_.enqueue_write_buffer(device_feature_masks_, 0, num_dense_feature4_ * dword_features_, ptr_pinned_feature_masks_);
+    queue_.enqueueWriteBuffer(device_feature_masks_, 0, num_dense_feature4_ * dword_features_, ptr_pinned_feature_masks_);
   }
-  // All data have been prepared, now run the GPU kernel
-  GPUHistogram(num_data, use_all_features);
+  // All data have been prepared, now run the FPGA kernel
+  FPGAHistogram(num_data, use_all_features);
   return true;
 }
 
-void GPUTreeLearner::ConstructHistograms(const std::vector<int8_t>& is_feature_used, bool use_subtract) {
+void FPGATreeLearner::ConstructHistograms(const std::vector<int8_t>& is_feature_used, bool use_subtract) {
   std::vector<int8_t> is_sparse_feature_used(num_features_, 0);
   std::vector<int8_t> is_dense_feature_used(num_features_, 0);
   #pragma omp parallel for schedule(static)
@@ -991,8 +1149,8 @@ void GPUTreeLearner::ConstructHistograms(const std::vector<int8_t>& is_feature_u
   }
   // construct smaller leaf
   HistogramBinEntry* ptr_smaller_leaf_hist_data = smaller_leaf_histogram_array_[0].RawData() - 1;
-  // ConstructGPUHistogramsAsync will return true if there are availabe feature gourps dispatched to GPU
-  bool is_gpu_used = ConstructGPUHistogramsAsync(is_feature_used,
+  // ConstructFPGAHistogramsAsync will return true if there are availabe feature gourps dispatched to FPGA
+  bool is_FPGA_used = ConstructFPGAHistogramsAsync(is_feature_used,
     nullptr, smaller_leaf_splits_->num_data_in_leaf(),
     nullptr, nullptr,
     nullptr, nullptr);
@@ -1004,21 +1162,21 @@ void GPUTreeLearner::ConstructHistograms(const std::vector<int8_t>& is_feature_u
     ordered_bins_, gradients_, hessians_,
     ordered_gradients_.data(), ordered_hessians_.data(), is_constant_hessian_,
     ptr_smaller_leaf_hist_data);
-  // wait for GPU to finish, only if GPU is actually used
-  if (is_gpu_used) {
-    if (config_->gpu_use_dp) {
+  // wait for FPGA to finish, only if FPGA is actually used
+  if (is_FPGA_used) {
+    if (config_->FPGA_use_dp) {
       // use double precision
       WaitAndGetHistograms<HistogramBinEntry>(ptr_smaller_leaf_hist_data);
     }
     else {
       // use single precision
-      WaitAndGetHistograms<GPUHistogramBinEntry>(ptr_smaller_leaf_hist_data);
+      WaitAndGetHistograms<FPGAHistogramBinEntry>(ptr_smaller_leaf_hist_data);
     }
   }
 
-  // Compare GPU histogram with CPU histogram, useful for debuggin GPU code problem
-  // #define GPU_DEBUG_COMPARE
-  #ifdef GPU_DEBUG_COMPARE
+  // Compare FPGA histogram with CPU histogram, useful for debuggin FPGA code problem
+  // #define FPGA_DEBUG_COMPARE
+  #ifdef FPGA_DEBUG_COMPARE
   for (int i = 0; i < num_dense_feature_groups_; ++i) {
     if (!feature_masks_[i])
       continue;
@@ -1026,10 +1184,10 @@ void GPUTreeLearner::ConstructHistograms(const std::vector<int8_t>& is_feature_u
     size_t size = train_data_->FeatureGroupNumBin(dense_feature_group_index);
     HistogramBinEntry* ptr_smaller_leaf_hist_data = smaller_leaf_histogram_array_[0].RawData() - 1;
     HistogramBinEntry* current_histogram = ptr_smaller_leaf_hist_data + train_data_->GroupBinBoundary(dense_feature_group_index);
-    HistogramBinEntry* gpu_histogram = new HistogramBinEntry[size];
+    HistogramBinEntry* FPGA_histogram = new HistogramBinEntry[size];
     data_size_t num_data = smaller_leaf_splits_->num_data_in_leaf();
     printf("Comparing histogram for feature %d size %d, %lu bins\n", dense_feature_group_index, num_data, size);
-    std::copy(current_histogram, current_histogram + size, gpu_histogram);
+    std::copy(current_histogram, current_histogram + size, FPGA_histogram);
     std::memset(current_histogram, 0, train_data_->FeatureGroupNumBin(dense_feature_group_index) * sizeof(HistogramBinEntry));
     train_data_->FeatureGroupBin(dense_feature_group_index)->ConstructHistogram(
       num_data != num_data_ ? smaller_leaf_splits_->data_indices() : nullptr,
@@ -1037,16 +1195,16 @@ void GPUTreeLearner::ConstructHistograms(const std::vector<int8_t>& is_feature_u
       num_data != num_data_ ? ordered_gradients_.data() : gradients_,
       num_data != num_data_ ? ordered_hessians_.data() : hessians_,
       current_histogram); 
-    CompareHistograms(gpu_histogram, current_histogram, size, dense_feature_group_index);
-    std::copy(gpu_histogram, gpu_histogram + size, current_histogram);
-    delete [] gpu_histogram;
+    CompareHistograms(FPGA_histogram, current_histogram, size, dense_feature_group_index);
+    std::copy(FPGA_histogram, FPGA_histogram + size, current_histogram);
+    delete [] FPGA_histogram;
   }
   #endif
 
   if (larger_leaf_histogram_array_ != nullptr && !use_subtract) {
     // construct larger leaf
     HistogramBinEntry* ptr_larger_leaf_hist_data = larger_leaf_histogram_array_[0].RawData() - 1;
-    is_gpu_used = ConstructGPUHistogramsAsync(is_feature_used,
+    is_FPGA_used = ConstructFPGAHistogramsAsync(is_feature_used,
       larger_leaf_splits_->data_indices(), larger_leaf_splits_->num_data_in_leaf(),
       gradients_, hessians_,
       ordered_gradients_.data(), ordered_hessians_.data());
@@ -1058,24 +1216,24 @@ void GPUTreeLearner::ConstructHistograms(const std::vector<int8_t>& is_feature_u
       ordered_bins_, gradients_, hessians_,
       ordered_gradients_.data(), ordered_hessians_.data(), is_constant_hessian_,
       ptr_larger_leaf_hist_data);
-    // wait for GPU to finish, only if GPU is actually used
-    if (is_gpu_used) {
-      if (config_->gpu_use_dp) {
+    // wait for FPGA to finish, only if FPGA is actually used
+    if (is_FPGA_used) {
+      if (config_->FPGA_use_dp) {
         // use double precision
         WaitAndGetHistograms<HistogramBinEntry>(ptr_larger_leaf_hist_data);
       }
       else {
         // use single precision
-        WaitAndGetHistograms<GPUHistogramBinEntry>(ptr_larger_leaf_hist_data);
+        WaitAndGetHistograms<FPGAHistogramBinEntry>(ptr_larger_leaf_hist_data);
       }
     }
   }
 }
 
-void GPUTreeLearner::FindBestSplits() {
+void FPGATreeLearner::FindBestSplits() {
   SerialTreeLearner::FindBestSplits();
 
-#if GPU_DEBUG >= 3
+#if FPGA_DEBUG >= 3
   for (int feature_index = 0; feature_index < num_features_; ++feature_index) {
     if (!is_feature_used_[feature_index]) continue;
     if (parent_leaf_histogram_array_ != nullptr
@@ -1093,18 +1251,20 @@ void GPUTreeLearner::FindBestSplits() {
 #endif
 }
 
-void GPUTreeLearner::Split(Tree* tree, int best_Leaf, int* left_leaf, int* right_leaf) {
+
+//reused from GPU
+void FPGATreeLearner::Split(Tree* tree, int best_Leaf, int* left_leaf, int* right_leaf) {
   const SplitInfo& best_split_info = best_split_per_leaf_[best_Leaf];
-#if GPU_DEBUG >= 2
+#if FPGA_DEBUG >= 2
   printf("Spliting leaf %d with feature %d thresh %d gain %f stat %f %f %f %f\n", best_Leaf, best_split_info.feature, best_split_info.threshold, best_split_info.gain, best_split_info.left_sum_gradient, best_split_info.right_sum_gradient, best_split_info.left_sum_hessian, best_split_info.right_sum_hessian);
 #endif
   SerialTreeLearner::Split(tree, best_Leaf, left_leaf, right_leaf);
   if (Network::num_machines() == 1) {
-    // do some sanity check for the GPU algorithm
+    // do some sanity check for the FPGA algorithm
     if (best_split_info.left_count < best_split_info.right_count) {
       if ((best_split_info.left_count != smaller_leaf_splits_->num_data_in_leaf()) ||
           (best_split_info.right_count!= larger_leaf_splits_->num_data_in_leaf())) {
-        Log::Fatal("Bug in GPU histogram! split %d: %d, smaller_leaf: %d, larger_leaf: %d\n", best_split_info.left_count, best_split_info.right_count, smaller_leaf_splits_->num_data_in_leaf(), larger_leaf_splits_->num_data_in_leaf());
+        Log::Fatal("Bug in FPGA histogram! split %d: %d, smaller_leaf: %d, larger_leaf: %d\n", best_split_info.left_count, best_split_info.right_count, smaller_leaf_splits_->num_data_in_leaf(), larger_leaf_splits_->num_data_in_leaf());
       }
     } else {
       double smaller_min = smaller_leaf_splits_->min_constraint();
@@ -1117,7 +1277,7 @@ void GPUTreeLearner::Split(Tree* tree, int best_Leaf, int* left_leaf, int* right
       larger_leaf_splits_->SetValueConstraint(larger_min, larger_max);
       if ((best_split_info.left_count != larger_leaf_splits_->num_data_in_leaf()) ||
           (best_split_info.right_count!= smaller_leaf_splits_->num_data_in_leaf())) {
-        Log::Fatal("Bug in GPU histogram! split %d: %d, smaller_leaf: %d, larger_leaf: %d\n", best_split_info.left_count, best_split_info.right_count, smaller_leaf_splits_->num_data_in_leaf(), larger_leaf_splits_->num_data_in_leaf());
+        Log::Fatal("Bug in FPGA histogram! split %d: %d, smaller_leaf: %d, larger_leaf: %d\n", best_split_info.left_count, best_split_info.right_count, smaller_leaf_splits_->num_data_in_leaf(), larger_leaf_splits_->num_data_in_leaf());
       }
     }
   }

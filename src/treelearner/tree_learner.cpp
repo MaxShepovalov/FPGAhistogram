@@ -29,6 +29,17 @@ TreeLearner* TreeLearner::CreateTreeLearner(const std::string& learner_type, con
       return new VotingParallelTreeLearner<GPUTreeLearner>(config);
     }
   }
+  else if (device_type == std::string("fpga")) {
+    if (learner_type == std::string("serial")) {
+      return new FPGATreeLearner(config);
+    } else if (learner_type == std::string("feature")) {
+      return new FeatureParallelTreeLearner<FPGATreeLearner>(config);
+    } else if (learner_type == std::string("data")) {
+      return new DataParallelTreeLearner<FPGATreeLearner>(config);
+    } else if (learner_type == std::string("voting")) {
+      return new VotingParallelTreeLearner<FPGATreeLearner>(config);
+    }
+  }
   return nullptr;
 }
 
