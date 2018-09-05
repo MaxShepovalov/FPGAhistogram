@@ -31,6 +31,7 @@ TreeLearner* TreeLearner::CreateTreeLearner(const std::string& learner_type, con
     }
   }
   else if (device_type == std::string("fpga")) {
+    #ifdef USE_FPGA
     if (learner_type == std::string("serial")) {
       return new FPGATreeLearner(config);
     } else if (learner_type == std::string("feature")) {
@@ -40,6 +41,7 @@ TreeLearner* TreeLearner::CreateTreeLearner(const std::string& learner_type, con
     } else if (learner_type == std::string("voting")) {
       return new VotingParallelTreeLearner<FPGATreeLearner>(config);
     }
+    #endif
   }
   return nullptr;
 }
